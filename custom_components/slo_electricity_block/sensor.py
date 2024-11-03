@@ -33,6 +33,12 @@ SEASON_ENTITY = SensorEntityDescription(
     icon="mdi:calendar",
 )
 
+WORKDAY_ENTITY = SensorEntityDescription(
+    key="working_day",
+    name="Electricity Working Day",
+    icon="mdi:calendar-clock",
+)
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -46,6 +52,7 @@ async def async_setup_entry(
         [
             SloveniaElectricityBlockSensor(coordinator, BLOCK_ENTITY),
             SloveniaElectricitySeasonSensor(coordinator, SEASON_ENTITY),
+            SloveniaElectricityWorkdaySensor(coordinator, WORKDAY_ENTITY),
         ],
         True,
     )
@@ -116,6 +123,38 @@ class SloveniaElectricitySeasonSensor(CoordinatorEntity[SloveniaElectricityBlock
             return {}
             
         return {
-            "working_day": "Yes" if self.coordinator.data.get("working_day") else "No",
+            "last_update": self.coordinator.data.get("last_update")
+        }
+
+class SloveniaElectricityWorkdaySensor(CoordinatorEntity[SloveniaElectricityBlockCoordinator], SensorEntity):
+    """Representation of Slovenia Electricity Working Day Sensor."""
+
+    entity_description: SensorEntityDescription
+
+    def __init__(
+        self,
+        coordinator: SloveniaElectricityBlockCoordinator,
+        description: SensorEntityDescription,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self.entity_description = description
+        self._attr_unique_id = f"{DOMAIN}_{description.key}"
+        _LOGGER.debug("Initializing Slovenia Electricity Working Day sensor")
+
+    @property
+    def native_value(self) -> StateType:
+        """Return the state of the sensor."""
+        if not self.coordinator.data:
+            return None
+        return "Working Day" if self.coordinator.data.get("working_day") else "Weekend"
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return the state attributes."""
+        if not self.coordinator.data:
+            return {}
+            
+        return {
             "last_update": self.coordinator.data.get("last_update")
         }

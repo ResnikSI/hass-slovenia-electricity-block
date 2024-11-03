@@ -7,9 +7,10 @@ A Home Assistant integration that shows the current electricity pricing block an
 - Automatically determines winter (higher) season and summer (lower) season
 - Shows current block number based on time of day and day type
 - Handles weekends and working days differently
-- Provides two sensors:
+- Provides three sensors:
   1. Current Electricity Block (1-4)
   2. Current Electricity Season (Higher/Lower)
+  3. Electricity Working Day (Working Day/Weekend)
 - Updates every minute
 - Includes additional attributes for detailed information
 
@@ -41,7 +42,7 @@ A Home Assistant integration that shows the current electricity pricing block an
 
 ## Block and Season Information
 
-### Working Days
+### Working Days (Monday-Friday)
 Winter Season (Nov 1 - Feb 28):
 - Block 1: Highest peak (16:00-18:00)
 - Block 2: Regular usage
@@ -52,7 +53,7 @@ Summer Season (Mar 1 - Oct 31):
 - Block 3: Mid-peak periods
 - Block 4: Night block (22:00-06:00)
 
-### Weekends and Holidays
+### Weekends (Saturday-Sunday)
 - Winter Season: Always Block 3
 - Summer Season: Always Block 4
 
@@ -62,7 +63,7 @@ Summer Season (Mar 1 - Oct 31):
 
 ## Example Card Configuration
 
-You can create a custom card in your dashboard to display both sensors. Here's an example using an entities card:
+You can create a custom card in your dashboard to display all sensors. Here's an example using an entities card:
 
 ```yaml
 type: entities
@@ -71,6 +72,8 @@ entities:
     name: Current Block
   - entity: sensor.current_electricity_season
     name: Current Season
+  - entity: sensor.electricity_working_day
+    name: Day Type
 ```
 
 Or using a Markdown card for more detailed information:
@@ -83,7 +86,7 @@ content: >
   
   Season: {{ states('sensor.current_electricity_season') }}
   
-  Working Day: {{ state_attr('sensor.current_electricity_block', 'working_day') }}
+  Day Type: {{ states('sensor.electricity_working_day') }}
   
   Last Updated: {{ state_attr('sensor.current_electricity_block', 'last_update') }}
 ```
