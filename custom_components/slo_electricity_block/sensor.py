@@ -16,6 +16,11 @@ from .const import (
     BLOCK_4,
     BLOCK_5,
     BLOCK_DESCRIPTIONS,
+    CONF_POWER_LIMIT_1,
+    CONF_POWER_LIMIT_2,
+    CONF_POWER_LIMIT_3,
+    CONF_POWER_LIMIT_4,
+    CONF_POWER_LIMIT_5,
     DAY_TYPE_NON_WORKING,
     DAY_TYPE_WORKING,
     DOMAIN,
@@ -37,11 +42,12 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the sensor platform."""
+    config_data = config_entry.data
     async_add_entities([
-        CurrentBlockSensor(),
+        CurrentBlockSensor(config_data),
         CurrentSeasonSensor(),
         DayTypeSensor(),
-        NextBlockSensor(),
+        NextBlockSensor(config_data),
         NextBlockTimeSensor(),
     ])
 
@@ -166,19 +172,25 @@ class CurrentBlockSensor(BlockCalculationMixin, SensorEntity):
     _attr_name = "Current Electricity Block"
     _attr_unique_id = "current_electricity_block"
 
-    def __init__(self) -> None:
+    def __init__(self, config_data: dict) -> None:
         """Initialize the sensor."""
         self._attr_native_value = None
         self._attr_extra_state_attributes: Dict[str, Any] = {}
+        self._config_data = config_data
 
     def update(self) -> None:
         """Update the sensor."""
         current_date = datetime.now()
         current_block = self._get_current_block(current_date)
         
+        # Get power limit for current block
+        power_limit_key = f"power_limit_{current_block}"
+        power_limit = self._config_data.get(power_limit_key, 0)
+        
         self._attr_native_value = current_block
         self._attr_extra_state_attributes = {
             "block_description": BLOCK_DESCRIPTIONS[current_block],
+            "power_limit": power_limit,
             "last_update": current_date.isoformat(),
         }
 
@@ -222,19 +234,25 @@ class NextBlockSensor(BlockCalculationMixin, SensorEntity):
     _attr_name = "Next Electricity Block"
     _attr_unique_id = "next_electricity_block"
 
-    def __init__(self) -> None:
+    def __init__(self, config_data: dict) -> None:
         """Initialize the sensor."""
         self._attr_native_value = None
         self._attr_extra_state_attributes: Dict[str, Any] = {}
+        self._config_data = config_data
 
     def update(self) -> None:
         """Update the sensor."""
         current_date = datetime.now()
         next_block, _ = self._get_next_block_info(current_date)
         
+        # Get power limit for next block
+        power_limit_key = f"power_limit_{next_block}"
+        power_limit = self._config_data.get(power_limit_key, 0)
+        
         self._attr_native_value = next_block
         self._attr_extra_state_attributes = {
             "block_description": BLOCK_DESCRIPTIONS[next_block],
+            "power_limit": power_limit,
             "last_update": current_date.isoformat(),
         }
 

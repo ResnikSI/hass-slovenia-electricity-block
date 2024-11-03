@@ -10,7 +10,15 @@ from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 
-from .const import DOMAIN
+from .const import (
+    DOMAIN,
+    CONF_POWER_LIMIT_1,
+    CONF_POWER_LIMIT_2,
+    CONF_POWER_LIMIT_3,
+    CONF_POWER_LIMIT_4,
+    CONF_POWER_LIMIT_5,
+    DEFAULT_POWER_LIMIT,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -37,16 +45,22 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             await self.async_set_unique_id(DOMAIN)
             return self.async_create_entry(
                 title="Slovenian Electricity Block",
-                data=user_input or {},
+                data=user_input,
             )
 
-        # Show configuration form
+        # Show configuration form with power limit inputs
         return self.async_show_form(
             step_id="user",
-            data_schema=vol.Schema({}),
+            data_schema=vol.Schema({
+                vol.Required(CONF_POWER_LIMIT_1, default=DEFAULT_POWER_LIMIT): vol.Coerce(float),
+                vol.Required(CONF_POWER_LIMIT_2, default=DEFAULT_POWER_LIMIT): vol.Coerce(float),
+                vol.Required(CONF_POWER_LIMIT_3, default=DEFAULT_POWER_LIMIT): vol.Coerce(float),
+                vol.Required(CONF_POWER_LIMIT_4, default=DEFAULT_POWER_LIMIT): vol.Coerce(float),
+                vol.Required(CONF_POWER_LIMIT_5, default=DEFAULT_POWER_LIMIT): vol.Coerce(float),
+            }),
             description_placeholders={
                 "name": "Slovenian Electricity Block",
-                "description": "Monitor current electricity pricing block in Slovenia"
+                "description": "Set agreed power limits (kW) for each block"
             },
             errors=errors,
         )
