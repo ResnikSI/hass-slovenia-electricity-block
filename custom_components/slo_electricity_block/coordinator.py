@@ -37,31 +37,16 @@ class SloveniaElectricityBlockCoordinator(DataUpdateCoordinator):
             return True
         return False
 
-    def _is_working_day(self, current_date: datetime) -> bool:
-        """Determine if current date is a working day."""
-        # Check if it's weekend
-        if current_date.weekday() >= 5:  # 5 = Saturday, 6 = Sunday
-            return False
-        
-        # Check if it's a holiday
-        date_str = current_date.strftime("%Y-%m-%d")
-        if date_str in HOLIDAYS:
-            return False
-        
-        return True
-
     def _get_current_block(self, current_time: datetime) -> int:
-        """Get the current block number based on time and day type."""
+        """Get the current block number based on time and season."""
         hour = current_time.hour
         minute = current_time.minute
         time_decimal = hour + minute / 60
-        is_working_day = self._is_working_day(current_time)
         is_winter = self._is_winter_season(current_time)
 
         _LOGGER.debug(
             f"Time check - Hour: {hour}, Minute: {minute}, "
-            f"Season: {'winter' if is_winter else 'summer'}, "
-            f"Day type: {'working' if is_working_day else 'non-working'}"
+            f"Season: {'winter' if is_winter else 'summer'}"
         )
 
         if is_winter:
@@ -117,17 +102,15 @@ class SloveniaElectricityBlockCoordinator(DataUpdateCoordinator):
             now = datetime.now()
             block = self._get_current_block(now)
             season = "winter" if self._is_winter_season(now) else "summer"
-            working_day = self._is_working_day(now)
             
             _LOGGER.debug(
                 f"Update result - Block: {block}, Season: {season}, "
-                f"Working day: {working_day}, Time: {now.strftime('%H:%M:%S')}"
+                f"Time: {now.strftime('%H:%M:%S')}"
             )
             
             return {
                 "block": block,
                 "season": season,
-                "working_day": working_day,
                 "last_update": now.isoformat()
             }
         except Exception as error:
