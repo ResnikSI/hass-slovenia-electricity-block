@@ -106,6 +106,58 @@ template:
             {{ (current_power / block_limit * 100)|round(1) if block_limit > 0 else 0 }}
 ```
 
+### Lovelace Card Example
+
+Here's an example of a Lovelace card that shows your power usage and limit:
+
+```yaml
+type: vertical-stack
+cards:
+  - type: entities
+    title: Current Electricity Block
+    entities:
+      - entity: sensor.current_electricity_block
+        name: Block
+        secondary_info: attribute
+        secondary_info_attribute: block_description
+      - entity: sensor.next_electricity_block
+        name: Next Block
+        secondary_info: attribute
+        secondary_info_attribute: block_description
+      - entity: sensor.next_block_start_time
+        name: Next Block Starts At
+
+  - type: gauge
+    title: Power Usage
+    entity: sensor.your_power_meter
+    min: 0
+    max: "{{ states.sensor.current_electricity_block.attributes.power_limit }}"
+    severity:
+      green: 0
+      yellow: "{{ states.sensor.current_electricity_block.attributes.power_limit * 0.9 }}"
+      red: "{{ states.sensor.current_electricity_block.attributes.power_limit }}"
+    needle: true
+
+  - type: glance
+    entities:
+      - entity: sensor.power_limit_status
+        name: Status
+        icon: >
+          {% set status = states('sensor.power_limit_status') %}
+          {% if status == 'exceeded' %}
+            mdi:alert-circle
+          {% elif status == 'warning' %}
+            mdi:alert
+          {% else %}
+            mdi:check-circle
+          {% endif %}
+      - entity: sensor.your_power_meter
+        name: Current Usage
+      - entity: sensor.current_electricity_block
+        name: Block Limit
+        state: "{{ state_attr('sensor.current_electricity_block', 'power_limit') }}"
+```
+
 You can then create an automation to notify you when approaching or exceeding the limit:
 
 ```yaml
