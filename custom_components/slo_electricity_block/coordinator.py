@@ -78,7 +78,10 @@ class SloveniaElectricityBlockCoordinator(DataUpdateCoordinator):
             if hour >= 16 and hour < 18:  # Peak hours
                 _LOGGER.debug("Winter working day - Block 1 (VT1)")
                 return 1
-            elif (hour >= 22 or hour < 6) or hour == 6:  # Night and early morning
+            elif hour >= 22 or hour < 6:  # Night
+                _LOGGER.debug("Winter working day - Block 3 (MT)")
+                return 3
+            elif hour == 6:  # Early morning
                 _LOGGER.debug("Winter working day - Block 3 (MT)")
                 return 3
             else:  # Regular hours
@@ -89,11 +92,17 @@ class SloveniaElectricityBlockCoordinator(DataUpdateCoordinator):
             if hour >= 22 or hour < 6:  # Night
                 _LOGGER.debug("Summer working day - Block 4 (MT)")
                 return 4
-            elif hour == 6 or (hour >= 14 and hour < 17) or (hour >= 20 and hour < 22):  # Peak periods
+            elif hour == 6:  # Early morning
+                _LOGGER.debug("Summer working day - Block 3 (VT)")
+                return 3
+            elif (hour >= 14 and hour < 17):  # Afternoon peak
+                _LOGGER.debug("Summer working day - Block 3 (VT)")
+                return 3
+            elif (hour >= 20 and hour < 22):  # Evening peak
                 _LOGGER.debug("Summer working day - Block 3 (VT)")
                 return 3
             else:  # Regular hours
-                _LOGGER.debug("Summer working day - Block 2 (VT)")
+                _LOGGER.debug(f"Summer working day - Block 2 (VT) at {hour}:{minute}")
                 return 2
 
     async def _async_update_data(self):
