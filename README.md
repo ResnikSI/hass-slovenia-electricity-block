@@ -44,15 +44,13 @@ A Home Assistant integration for tracking Slovenian electricity pricing blocks. 
 
 ## Configuration
 
-During installation, you'll need to configure:
+During installation, you'll need to configure your agreed power limits ("dogovorjena obračunska moč") for each time block:
 
-1. Power Limit for Block 1 (kW) - Agreed power limit for highest rate periods
-2. Power Limit for Block 2 (kW) - Agreed power limit for high rate periods
-3. Power Limit for Block 3 (kW) - Agreed power limit for medium rate periods
-4. Power Limit for Block 4 (kW) - Agreed power limit for low rate periods
-5. Power Limit for Block 5 (kW) - Agreed power limit for lowest rate periods
-
-These values represent your "dogovorjena obračunska moč" for each block.
+1. Time block 1 (kW) - Highest rate periods
+2. Time block 2 (kW) - High rate periods
+3. Time block 3 (kW) - Medium rate periods
+4. Time block 4 (kW) - Low rate periods
+5. Time block 5 (kW) - Lowest rate periods
 
 ## Sensors
 
@@ -61,7 +59,7 @@ The integration provides five sensors:
 1. Current Electricity Block (1-5)
    - Shows the current active block
    - Includes block description attribute
-   - Includes current block's power limit
+   - Includes current block's power limit in kW
 
 2. Current Electricity Season
    - "high" (Winter season: Nov 1 - Feb 28/29)
@@ -74,7 +72,7 @@ The integration provides five sensors:
 4. Next Electricity Block (1-5)
    - Shows the upcoming block
    - Includes block description attribute
-   - Includes next block's power limit
+   - Includes next block's power limit in kW
 
 5. Next Block Start Time
    - Shows when the next block will come into effect

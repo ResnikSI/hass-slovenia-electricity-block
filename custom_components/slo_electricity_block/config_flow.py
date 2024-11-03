@@ -49,18 +49,20 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
 
         # Show configuration form with power limit inputs
+        data_schema = {
+            vol.Required(CONF_POWER_LIMIT_1, default=DEFAULT_POWER_LIMIT): vol.Coerce(float),
+            vol.Required(CONF_POWER_LIMIT_2, default=DEFAULT_POWER_LIMIT): vol.Coerce(float),
+            vol.Required(CONF_POWER_LIMIT_3, default=DEFAULT_POWER_LIMIT): vol.Coerce(float),
+            vol.Required(CONF_POWER_LIMIT_4, default=DEFAULT_POWER_LIMIT): vol.Coerce(float),
+            vol.Required(CONF_POWER_LIMIT_5, default=DEFAULT_POWER_LIMIT): vol.Coerce(float),
+        }
+
         return self.async_show_form(
             step_id="user",
-            data_schema=vol.Schema({
-                vol.Required(CONF_POWER_LIMIT_1, default=DEFAULT_POWER_LIMIT): vol.Coerce(float),
-                vol.Required(CONF_POWER_LIMIT_2, default=DEFAULT_POWER_LIMIT): vol.Coerce(float),
-                vol.Required(CONF_POWER_LIMIT_3, default=DEFAULT_POWER_LIMIT): vol.Coerce(float),
-                vol.Required(CONF_POWER_LIMIT_4, default=DEFAULT_POWER_LIMIT): vol.Coerce(float),
-                vol.Required(CONF_POWER_LIMIT_5, default=DEFAULT_POWER_LIMIT): vol.Coerce(float),
-            }),
+            data_schema=vol.Schema(data_schema),
             description_placeholders={
                 "name": "Slovenian Electricity Block",
-                "description": "Set agreed power limits (kW) for each block"
+                "description": "Set agreed power limits (kW) for each time block"
             },
             errors=errors,
         )
