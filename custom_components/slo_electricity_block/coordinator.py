@@ -8,7 +8,29 @@ from homeassistant.helpers.update_coordinator import (
     UpdateFailed,
 )
 
-from .const import DOMAIN
+from .const import (
+    DOMAIN,
+    HOLIDAYS,
+    BLOCK_HIGHER_PEAK,
+    BLOCK_HIGHER_NORMAL,
+    BLOCK_HIGHER_LOW,
+    BLOCK_LOWER_NORMAL,
+    BLOCK_LOWER_LOW,
+    HIGHER_SEASON_START_MONTH,
+    HIGHER_SEASON_START_DAY,
+    HIGHER_SEASON_END_MONTH,
+    HIGHER_SEASON_END_DAY,
+    NIGHT_START_HOUR,
+    NIGHT_END_HOUR,
+    MORNING_PEAK_START_HOUR,
+    MORNING_PEAK_END_HOUR,
+    AFTERNOON_PEAK_START_HOUR,
+    AFTERNOON_PEAK_END_HOUR,
+    EVENING_PEAK_START_HOUR,
+    EVENING_PEAK_END_HOUR,
+    WINTER_PEAK_START_HOUR,
+    WINTER_PEAK_END_HOUR,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,7 +52,7 @@ class SloveniaElectricityBlockCoordinator(DataUpdateCoordinator):
         day = current_date.day
         
         # Winter season: November 1 to February 28/29
-        if month == 11 or month == 12 or month == 1 or (month == 2 and day <= 28):
+        if month == HIGHER_SEASON_START_MONTH or month == 12 or month == 1 or (month == HIGHER_SEASON_END_MONTH and day <= HIGHER_SEASON_END_DAY):
             return True
         return False
 
@@ -40,7 +62,11 @@ class SloveniaElectricityBlockCoordinator(DataUpdateCoordinator):
         if current_date.weekday() >= 5:  # 5 = Saturday, 6 = Sunday
             return False
         
-        # TODO: Add Slovenian holidays check if needed
+        # Check if it's a holiday
+        date_str = current_date.strftime("%Y-%m-%d")
+        if date_str in HOLIDAYS:
+            return False
+        
         return True
 
     def _get_current_block(self, current_time: datetime) -> int:
@@ -60,42 +86,44 @@ class SloveniaElectricityBlockCoordinator(DataUpdateCoordinator):
         if not is_working_day:
             # Weekend/Holiday rules
             if is_winter:
-                _LOGGER.debug("Winter weekend - Block 3")
-                return 3
+                _LOGGER.debug("Winter weekend/holiday - Block 3 (Higher low)")
+                return BLOCK_HIGHER_LOW
             else:
-                _LOGGER.debug("Summer weekend - Block 4")
-                return 4
+                _LOGGER.debug("Summer weekend/holiday - Block 4 (Lower low)")
+                return BLOCK_LOWER_LOW
 
         # Working day rules
         if is_winter:
-            if 16 <= current_time_decimal < 18:
-                _LOGGER.debug("Winter working day - Block 1 (Evening peak)")
-                return 1
-            elif (22 <= current_time_decimal < 24) or (0 <= current_time_decimal < 6):
-                _LOGGER.debug("Winter working day - Block 3 (Night)")
-                return 3
-            elif 6 <= current_time_decimal < 7:
-                _LOGGER.debug("Winter working day - Block 3 (Early morning)")
-                return 3
+            # Winter season working day
+            if WINTER_PEAK_START_HOUR <= current_time_decimal < WINTER_PEAK_END_HOUR:
+                _LOGGER.debug("Winter working day - Block 1 (Higher peak)")
+                return BLOCK_HIGHER_PEAK
+            elif (NIGHT_START_HOUR <= current_time_decimal < 24) or (0 <= current_time_decimal < NIGHT_END_HOUR):
+                _LOGGER.debug("Winter working day - Block 3 (Higher low)")
+                return BLOCK_HIGHER_LOW
+            elif MORNING_PEAK_START_HOUR <= current_time_decimal < MORNING_PEAK_END_HOUR:
+                _LOGGER.debug("Winter working day - Block 3 (Higher low)")
+                return BLOCK_HIGHER_LOW
             else:
-                _LOGGER.debug("Winter working day - Block 2 (Regular)")
-                return 2
-        else:  # Summer
-            if (22 <= current_time_decimal < 24) or (0 <= current_time_decimal < 6):
-                _LOGGER.debug("Summer working day - Block 4 (Night)")
-                return 4
-            elif 6 <= current_time_decimal < 7:
-                _LOGGER.debug("Summer working day - Block 3 (Early morning)")
-                return 3
-            elif 14 <= current_time_decimal < 17:
-                _LOGGER.debug("Summer working day - Block 3 (Afternoon)")
-                return 3
-            elif 20 <= current_time_decimal < 22:
-                _LOGGER.debug("Summer working day - Block 3 (Evening)")
-                return 3
+                _LOGGER.debug("Winter working day - Block 2 (Higher normal)")
+                return BLOCK_HIGHER_NORMAL
+        else:
+            # Summer season working day
+            if (NIGHT_START_HOUR <= current_time_decimal < 24) or (0 <= current_time_decimal < NIGHT_END_HOUR):
+                _LOGGER.debug("Summer working day - Block 4 (Lower low)")
+                return BLOCK_LOWER_LOW
+            elif MORNING_PEAK_START_HOUR <= current_time_decimal < MORNING_PEAK_END_HOUR:
+                _LOGGER.debug("Summer working day - Block 3 (Lower peak)")
+                return BLOCK_HIGHER_LOW
+            elif AFTERNOON_PEAK_START_HOUR <= current_time_decimal < AFTERNOON_PEAK_END_HOUR:
+                _LOGGER.debug("Summer working day - Block 3 (Lower peak)")
+                return BLOCK_HIGHER_LOW
+            elif EVENING_PEAK_START_HOUR <= current_time_decimal < EVENING_PEAK_END_HOUR:
+                _LOGGER.debug("Summer working day - Block 3 (Lower peak)")
+                return BLOCK_HIGHER_LOW
             else:
-                _LOGGER.debug(f"Summer working day - Block 2 (Regular) - Time: {current_time_decimal}")
-                return 2
+                _LOGGER.debug("Summer working day - Block 2 (Lower normal)")
+                return BLOCK_LOWER_NORMAL
 
     async def _async_update_data(self):
         """Update data."""

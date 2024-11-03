@@ -1,18 +1,18 @@
 # Slovenia Electricity Block Sensor
 
-A Home Assistant integration that shows the current electricity pricing block and season in Slovenia's new 5-block system, taking into account working days and weekends.
+A Home Assistant integration that shows the current electricity pricing block and season in Slovenia's new 5-block system, taking into account working days, weekends, and holidays.
 
 ## Features
 
 - Automatically determines winter (higher) season and summer (lower) season
 - Shows current block number based on time of day and day type
-- Handles weekends and working days differently
+- Handles weekends and holidays differently
+- Includes Slovenian national holidays for 2024-2025
 - Provides three sensors:
   1. Current Electricity Block (1-4)
   2. Current Electricity Season (Higher/Lower)
   3. Electricity Working Day (Working Day/Weekend)
 - Updates every minute
-- Includes additional attributes for detailed information
 
 ## Installation
 
@@ -42,24 +42,37 @@ A Home Assistant integration that shows the current electricity pricing block an
 
 ## Block and Season Information
 
-### Working Days (Monday-Friday)
+### Working Days (Monday-Friday, excluding holidays)
 Winter Season (Nov 1 - Feb 28):
-- Block 1: Highest peak (16:00-18:00)
-- Block 2: Regular usage
-- Block 3: Night/early morning (22:00-03:00, 06:00-07:00)
+- Block 1 (VT1): Higher peak (16:00-18:00)
+- Block 2 (VT2): Higher normal (regular usage)
+- Block 3 (MT): Higher low (22:00-06:00, 06:00-07:00)
 
 Summer Season (Mar 1 - Oct 31):
-- Block 2: Regular usage
-- Block 3: Mid-peak periods
-- Block 4: Night block (22:00-06:00)
+- Block 2 (VT): Lower normal (regular usage)
+- Block 3 (MT): Lower peak (06:00-07:00, 14:00-17:00, 20:00-22:00)
+- Block 4 (MT): Lower low (22:00-06:00)
 
-### Weekends (Saturday-Sunday)
-- Winter Season: Always Block 3
-- Summer Season: Always Block 4
+### Weekends and Holidays
+- Winter Season: Always Block 3 (Higher low)
+- Summer Season: Always Block 4 (Lower low)
 
 ### Seasons
 - Higher Season (Winter): November 1 to February 28/29
 - Lower Season (Summer): March 1 to October 31
+
+### Included Holidays
+- New Year's Day (Jan 1-2)
+- Prešeren Day (Feb 8)
+- Easter Monday
+- Day of Uprising Against Occupation (Apr 27)
+- Labour Day (May 1-2)
+- Statehood Day (Jun 25)
+- Assumption Day (Aug 15)
+- Reformation Day (Oct 31)
+- All Saints' Day (Nov 1)
+- Christmas Day (Dec 25)
+- Independence and Unity Day (Dec 26)
 
 ## Example Card Configuration
 
