@@ -32,12 +32,12 @@ HOLIDAYS = [
     "2025-12-26",  # Independence and Unity Day
 ]
 
-# Time blocks
-BLOCK_HIGHER_PEAK = 1      # VT1 - Higher peak
-BLOCK_HIGHER_NORMAL = 2    # VT2 - Higher normal
-BLOCK_HIGHER_LOW = 3       # MT - Higher low
-BLOCK_LOWER_NORMAL = 2     # VT - Lower normal
-BLOCK_LOWER_LOW = 4        # MT - Lower low
+# Block definitions
+BLOCK_1 = 1  # Highest rate (winter working days peak)
+BLOCK_2 = 2  # High rate
+BLOCK_3 = 3  # Medium rate
+BLOCK_4 = 4  # Low rate
+BLOCK_5 = 5  # Lowest rate (summer non-working days)
 
 # Season dates
 HIGHER_SEASON_START_MONTH = 11    # November
@@ -45,14 +45,35 @@ HIGHER_SEASON_START_DAY = 1
 HIGHER_SEASON_END_MONTH = 2       # February
 HIGHER_SEASON_END_DAY = 28        # or 29 in leap years
 
-# Time ranges
-NIGHT_START_HOUR = 22
-NIGHT_END_HOUR = 6
-MORNING_PEAK_START_HOUR = 6
-MORNING_PEAK_END_HOUR = 7
-AFTERNOON_PEAK_START_HOUR = 14
-AFTERNOON_PEAK_END_HOUR = 17
-EVENING_PEAK_START_HOUR = 20
-EVENING_PEAK_END_HOUR = 22
-WINTER_PEAK_START_HOUR = 16
-WINTER_PEAK_END_HOUR = 18
+# Time ranges for all periods
+TIME_RANGES = {
+    "NIGHT_START": 22,    # 22:00
+    "NIGHT_END": 6,      # 06:00
+    "MORNING_START": 6,   # 06:00
+    "MORNING_END": 7,    # 07:00
+    "DAY1_START": 7,     # 07:00
+    "DAY1_END": 14,      # 14:00
+    "DAY2_START": 14,    # 14:00
+    "DAY2_END": 16,      # 16:00
+    "DAY3_START": 16,    # 16:00
+    "DAY3_END": 20,      # 20:00
+    "EVENING_START": 20,  # 20:00
+    "EVENING_END": 22,   # 22:00
+}
+
+# Block descriptions
+BLOCK_DESCRIPTIONS = {
+    BLOCK_1: "Highest Rate",
+    BLOCK_2: "High Rate",
+    BLOCK_3: "Medium Rate",
+    BLOCK_4: "Low Rate",
+    BLOCK_5: "Lowest Rate",
+}
+
+# Season descriptions
+SEASON_HIGHER = "Higher Season (Winter)"
+SEASON_LOWER = "Lower Season (Summer)"
+
+# Day type descriptions
+DAY_TYPE_WORKING = "Working Day"
+DAY_TYPE_NON_WORKING = "Non-Working Day"

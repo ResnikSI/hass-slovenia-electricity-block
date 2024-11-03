@@ -1,160 +1,198 @@
-"""Sensor platform for Slovenia Electricity Block integration."""
-from __future__ import annotations
-
+"""Platform for sensor integration."""
+from datetime import datetime
 import logging
+from typing import Any, Dict, Optional
 
-from homeassistant.components.sensor import (
-    SensorDeviceClass,
-    SensorEntity,
-    SensorEntityDescription,
-)
+from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
-from homeassistant.helpers.update_coordinator import (
-    CoordinatorEntity,
-)
 
-from .const import DOMAIN
-from .coordinator import SloveniaElectricityBlockCoordinator
+from .const import (
+    BLOCK_1,
+    BLOCK_2,
+    BLOCK_3,
+    BLOCK_4,
+    BLOCK_5,
+    BLOCK_DESCRIPTIONS,
+    DAY_TYPE_NON_WORKING,
+    DAY_TYPE_WORKING,
+    DOMAIN,
+    HIGHER_SEASON_END_DAY,
+    HIGHER_SEASON_END_MONTH,
+    HIGHER_SEASON_START_DAY,
+    HIGHER_SEASON_START_MONTH,
+    HOLIDAYS,
+    SEASON_HIGHER,
+    SEASON_LOWER,
+    TIME_RANGES,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
-BLOCK_ENTITY = SensorEntityDescription(
-    key="current_block",
-    name="Current Electricity Block",
-    icon="mdi:flash",
-)
-
-SEASON_ENTITY = SensorEntityDescription(
-    key="current_season",
-    name="Current Electricity Season",
-    icon="mdi:calendar",
-)
-
-WORKDAY_ENTITY = SensorEntityDescription(
-    key="working_day",
-    name="Electricity Working Day",
-    icon="mdi:calendar-clock",
-)
-
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the sensor platform."""
-    _LOGGER.debug("Setting up Slovenia Electricity Block sensor platform")
-    coordinator: SloveniaElectricityBlockCoordinator = hass.data[DOMAIN][entry.entry_id]
+    async_add_entities([
+        CurrentBlockSensor(),
+        CurrentSeasonSensor(),
+        DayTypeSensor(),
+    ])
 
-    async_add_entities(
-        [
-            SloveniaElectricityBlockSensor(coordinator, BLOCK_ENTITY),
-            SloveniaElectricitySeasonSensor(coordinator, SEASON_ENTITY),
-            SloveniaElectricityWorkdaySensor(coordinator, WORKDAY_ENTITY),
-        ],
-        True,
-    )
+class CurrentBlockSensor(SensorEntity):
+    """Sensor for current electricity block."""
 
-class SloveniaElectricityBlockSensor(CoordinatorEntity[SloveniaElectricityBlockCoordinator], SensorEntity):
-    """Representation of Slovenia Electricity Block Sensor."""
+    _attr_name = "Current Electricity Block"
+    _attr_unique_id = "current_electricity_block"
 
-    entity_description: SensorEntityDescription
-
-    def __init__(
-        self,
-        coordinator: SloveniaElectricityBlockCoordinator,
-        description: SensorEntityDescription,
-    ) -> None:
+    def __init__(self) -> None:
         """Initialize the sensor."""
-        super().__init__(coordinator)
-        self.entity_description = description
-        self._attr_unique_id = f"{DOMAIN}_{description.key}"
-        _LOGGER.debug("Initializing Slovenia Electricity Block sensor")
+        self._attr_native_value = None
+        self._attr_extra_state_attributes: Dict[str, Any] = {}
 
-    @property
-    def native_value(self) -> StateType:
-        """Return the state of the sensor."""
-        if not self.coordinator.data:
-            return None
-        return self.coordinator.data.get("block")
+    def _is_higher_season(self, current_date: datetime) -> bool:
+        """Determine if current date is in higher season (winter)."""
+        month = current_date.month
+        day = current_date.day
 
-    @property
-    def extra_state_attributes(self) -> dict:
-        """Return the state attributes."""
-        if not self.coordinator.data:
-            return {}
-            
-        return {
-            "season": self.coordinator.data.get("season"),
-            "working_day": "Yes" if self.coordinator.data.get("working_day") else "No",
-            "last_update": self.coordinator.data.get("last_update")
+        if month == HIGHER_SEASON_START_MONTH and day >= HIGHER_SEASON_START_DAY:
+            return True
+        if month > HIGHER_SEASON_START_MONTH or month < HIGHER_SEASON_END_MONTH:
+            return True
+        if month == HIGHER_SEASON_END_MONTH and day <= HIGHER_SEASON_END_DAY:
+            return True
+        return False
+
+    def _is_working_day(self, current_date: datetime) -> bool:
+        """Determine if current date is a working day."""
+        if current_date.strftime("%Y-%m-%d") in HOLIDAYS:
+            return False
+        return current_date.weekday() < 5
+
+    def _get_current_block(self, current_date: datetime) -> int:
+        """Get current block based on time and season."""
+        hour = current_date.hour
+        is_higher_season = self._is_higher_season(current_date)
+        is_working_day = self._is_working_day(current_date)
+        tr = TIME_RANGES  # shorthand for readability
+
+        if is_higher_season:
+            if is_working_day:
+                # Higher Season (Winter) - Working Days
+                if tr["NIGHT_START"] <= hour < 24 or 0 <= hour < tr["NIGHT_END"]:
+                    return BLOCK_3
+                elif tr["MORNING_START"] <= hour < tr["MORNING_END"]:
+                    return BLOCK_2
+                elif tr["DAY1_START"] <= hour < tr["DAY1_END"]:
+                    return BLOCK_1
+                elif tr["DAY2_START"] <= hour < tr["DAY2_END"]:
+                    return BLOCK_2
+                elif tr["DAY3_START"] <= hour < tr["DAY3_END"]:
+                    return BLOCK_1
+                else:  # 20:00-22:00
+                    return BLOCK_2
+            else:
+                # Higher Season (Winter) - Non-Working Days
+                if tr["NIGHT_START"] <= hour < 24 or 0 <= hour < tr["NIGHT_END"]:
+                    return BLOCK_4
+                elif tr["MORNING_START"] <= hour < tr["MORNING_END"]:
+                    return BLOCK_3
+                elif tr["DAY1_START"] <= hour < tr["DAY1_END"]:
+                    return BLOCK_2
+                elif tr["DAY2_START"] <= hour < tr["DAY2_END"]:
+                    return BLOCK_3
+                elif tr["DAY3_START"] <= hour < tr["DAY3_END"]:
+                    return BLOCK_2
+                else:  # 20:00-22:00
+                    return BLOCK_3
+        else:
+            if is_working_day:
+                # Lower Season (Summer) - Working Days
+                if tr["NIGHT_START"] <= hour < 24 or 0 <= hour < tr["NIGHT_END"]:
+                    return BLOCK_4
+                elif tr["MORNING_START"] <= hour < tr["MORNING_END"]:
+                    return BLOCK_3
+                elif tr["DAY1_START"] <= hour < tr["DAY1_END"]:
+                    return BLOCK_2
+                elif tr["DAY2_START"] <= hour < tr["DAY2_END"]:
+                    return BLOCK_3
+                elif tr["DAY3_START"] <= hour < tr["DAY3_END"]:
+                    return BLOCK_2
+                else:  # 20:00-22:00
+                    return BLOCK_3
+            else:
+                # Lower Season (Summer) - Non-Working Days
+                if tr["NIGHT_START"] <= hour < 24 or 0 <= hour < tr["NIGHT_END"]:
+                    return BLOCK_5
+                elif tr["MORNING_START"] <= hour < tr["MORNING_END"]:
+                    return BLOCK_4
+                elif tr["DAY1_START"] <= hour < tr["DAY1_END"]:
+                    return BLOCK_3
+                elif tr["DAY2_START"] <= hour < tr["DAY2_END"]:
+                    return BLOCK_4
+                elif tr["DAY3_START"] <= hour < tr["DAY3_END"]:
+                    return BLOCK_3
+                else:  # 20:00-22:00
+                    return BLOCK_4
+
+    def update(self) -> None:
+        """Update the sensor."""
+        current_date = datetime.now()
+        current_block = self._get_current_block(current_date)
+        
+        self._attr_native_value = current_block
+        self._attr_extra_state_attributes = {
+            "block_description": BLOCK_DESCRIPTIONS[current_block],
+            "last_update": current_date.isoformat(),
         }
 
-class SloveniaElectricitySeasonSensor(CoordinatorEntity[SloveniaElectricityBlockCoordinator], SensorEntity):
-    """Representation of Slovenia Electricity Season Sensor."""
+class CurrentSeasonSensor(SensorEntity):
+    """Sensor for current season."""
 
-    entity_description: SensorEntityDescription
+    _attr_name = "Current Electricity Season"
+    _attr_unique_id = "current_electricity_season"
 
-    def __init__(
-        self,
-        coordinator: SloveniaElectricityBlockCoordinator,
-        description: SensorEntityDescription,
-    ) -> None:
+    def __init__(self) -> None:
         """Initialize the sensor."""
-        super().__init__(coordinator)
-        self.entity_description = description
-        self._attr_unique_id = f"{DOMAIN}_{description.key}"
-        _LOGGER.debug("Initializing Slovenia Electricity Season sensor")
+        self._attr_native_value = None
 
-    @property
-    def native_value(self) -> StateType:
-        """Return the state of the sensor."""
-        if not self.coordinator.data:
-            return None
-        season = self.coordinator.data.get("season")
-        return "Higher" if season == "winter" else "Lower"
+    def _is_higher_season(self, current_date: datetime) -> bool:
+        """Determine if current date is in higher season (winter)."""
+        month = current_date.month
+        day = current_date.day
 
-    @property
-    def extra_state_attributes(self) -> dict:
-        """Return the state attributes."""
-        if not self.coordinator.data:
-            return {}
-            
-        return {
-            "last_update": self.coordinator.data.get("last_update")
-        }
+        if month == HIGHER_SEASON_START_MONTH and day >= HIGHER_SEASON_START_DAY:
+            return True
+        if month > HIGHER_SEASON_START_MONTH or month < HIGHER_SEASON_END_MONTH:
+            return True
+        if month == HIGHER_SEASON_END_MONTH and day <= HIGHER_SEASON_END_DAY:
+            return True
+        return False
 
-class SloveniaElectricityWorkdaySensor(CoordinatorEntity[SloveniaElectricityBlockCoordinator], SensorEntity):
-    """Representation of Slovenia Electricity Working Day Sensor."""
+    def update(self) -> None:
+        """Update the sensor."""
+        current_date = datetime.now()
+        self._attr_native_value = SEASON_HIGHER if self._is_higher_season(current_date) else SEASON_LOWER
 
-    entity_description: SensorEntityDescription
+class DayTypeSensor(SensorEntity):
+    """Sensor for day type (working/non-working)."""
 
-    def __init__(
-        self,
-        coordinator: SloveniaElectricityBlockCoordinator,
-        description: SensorEntityDescription,
-    ) -> None:
+    _attr_name = "Electricity Working Day"
+    _attr_unique_id = "electricity_working_day"
+
+    def __init__(self) -> None:
         """Initialize the sensor."""
-        super().__init__(coordinator)
-        self.entity_description = description
-        self._attr_unique_id = f"{DOMAIN}_{description.key}"
-        _LOGGER.debug("Initializing Slovenia Electricity Working Day sensor")
+        self._attr_native_value = None
 
-    @property
-    def native_value(self) -> StateType:
-        """Return the state of the sensor."""
-        if not self.coordinator.data:
-            return None
-        return "Working Day" if self.coordinator.data.get("working_day") else "Weekend"
-
-    @property
-    def extra_state_attributes(self) -> dict:
-        """Return the state attributes."""
-        if not self.coordinator.data:
-            return {}
-            
-        return {
-            "last_update": self.coordinator.data.get("last_update")
-        }
+    def update(self) -> None:
+        """Update the sensor."""
+        current_date = datetime.now()
+        is_working_day = (
+            current_date.weekday() < 5 and 
+            current_date.strftime("%Y-%m-%d") not in HOLIDAYS
+        )
+        self._attr_native_value = DAY_TYPE_WORKING if is_working_day else DAY_TYPE_NON_WORKING
