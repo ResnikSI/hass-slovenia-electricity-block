@@ -1,16 +1,8 @@
 {
     "name": "Slovenia Electricity Block",
+    "content_in_root": false,
     "render_readme": true,
     "domains": ["sensor"],
-    "iot_class": "calculated",
-    "homeassistant": "2024.1.0",
-    "zip_release": true,
-    "filename": "slo_electricity_block.zip",
-    "hide_default_branch": true,
-    "render_readme": true,
     "country": ["SI"],
-    "persistent_directory": "custom_components/slo_electricity_block",
-    "hacs": "1.6.0",
-    "full_name": "ResnikSI/hass-slovenia-electricity-block",
-    "archive_download_url": "https://github.com/ResnikSI/hass-slovenia-electricity-block/releases/download/{version}/slo_electricity_block.zip"
+    "homeassistant": "2024.1.0"
 }
