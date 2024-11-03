@@ -3,11 +3,11 @@
 DOMAIN = "slo_electricity_block"
 
 # Configuration keys
-CONF_POWER_LIMIT_1 = "power_limit_1"
-CONF_POWER_LIMIT_2 = "power_limit_2"
-CONF_POWER_LIMIT_3 = "power_limit_3"
-CONF_POWER_LIMIT_4 = "power_limit_4"
-CONF_POWER_LIMIT_5 = "power_limit_5"
+CONF_POWER_LIMIT_1 = "Block 1"
+CONF_POWER_LIMIT_2 = "Block 2"
+CONF_POWER_LIMIT_3 = "Block 3"
+CONF_POWER_LIMIT_4 = "Block 4"
+CONF_POWER_LIMIT_5 = "Block 5"
 
 # Default power limits in kW
 DEFAULT_POWER_LIMIT = 7  # 7kW default
