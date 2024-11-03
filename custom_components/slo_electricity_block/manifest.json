@@ -7,7 +7,7 @@
   "config_flow": true,
   "codeowners": ["@ResnikSI"],
   "requirements": [],
-  "version": "0.2.3",
+  "version": "0.2.4",
   "iot_class": "calculated",
-  "integration_type": "device"
+  "integration_type": "service"
 }
