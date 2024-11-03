@@ -16,7 +16,7 @@ from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
 )
 
-from . import DOMAIN
+from .const import DOMAIN
 from .coordinator import SloveniaElectricityBlockCoordinator
 
 _LOGGER = logging.getLogger(__name__)
