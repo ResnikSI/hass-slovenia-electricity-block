@@ -7,11 +7,10 @@
   "config_flow": true,
   "codeowners": ["@ResnikSI"],
   "requirements": [],
-  "version": "0.3.3",
+  "version": "0.4.0",
   "iot_class": "calculated",
   "integration_type": "service",
   "translations": [],
   "icon": "mdi:flash",
-  "homeassistant": "2024.1.0",
-  "render_readme": true
+  "homeassistant": "2024.1.0"
 }

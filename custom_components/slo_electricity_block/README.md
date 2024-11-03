@@ -1,11 +1,12 @@
 # Slovenia Electricity Block Sensor
 
-A Home Assistant integration that shows the current electricity pricing block and season in Slovenia's new 5-block system.
+A Home Assistant integration that shows the current electricity pricing block and season in Slovenia's new 5-block system, taking into account working days and weekends.
 
 ## Features
 
 - Automatically determines winter (higher) season and summer (lower) season
-- Shows current block number based on time of day
+- Shows current block number based on time of day and day type
+- Handles weekends and working days differently
 - Provides two sensors:
   1. Current Electricity Block (1-4)
   2. Current Electricity Season (Higher/Lower)
@@ -40,7 +41,7 @@ A Home Assistant integration that shows the current electricity pricing block an
 
 ## Block and Season Information
 
-### Block Meanings
+### Working Days
 Winter Season (Nov 1 - Feb 28):
 - Block 1: Highest peak (16:00-18:00)
 - Block 2: Regular usage
@@ -50,6 +51,10 @@ Summer Season (Mar 1 - Oct 31):
 - Block 2: Regular usage
 - Block 3: Mid-peak periods
 - Block 4: Night block (22:00-06:00)
+
+### Weekends and Holidays
+- Winter Season: Always Block 3
+- Summer Season: Always Block 4
 
 ### Seasons
 - Higher Season (Winter): November 1 to February 28/29
@@ -77,6 +82,8 @@ content: >
   Current Block: {{ states('sensor.current_electricity_block') }}
   
   Season: {{ states('sensor.current_electricity_season') }}
+  
+  Working Day: {{ state_attr('sensor.current_electricity_block', 'working_day') }}
   
   Last Updated: {{ state_attr('sensor.current_electricity_block', 'last_update') }}
 ```

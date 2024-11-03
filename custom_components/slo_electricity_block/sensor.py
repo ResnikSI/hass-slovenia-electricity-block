@@ -81,6 +81,7 @@ class SloveniaElectricityBlockSensor(CoordinatorEntity[SloveniaElectricityBlockC
             
         return {
             "season": self.coordinator.data.get("season"),
+            "working_day": "Yes" if self.coordinator.data.get("working_day") else "No",
             "last_update": self.coordinator.data.get("last_update")
         }
 
@@ -115,5 +116,6 @@ class SloveniaElectricitySeasonSensor(CoordinatorEntity[SloveniaElectricityBlock
             return {}
             
         return {
+            "working_day": "Yes" if self.coordinator.data.get("working_day") else "No",
             "last_update": self.coordinator.data.get("last_update")
         }
