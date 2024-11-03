@@ -72,18 +72,27 @@ class SloveniaElectricityBlockCoordinator(DataUpdateCoordinator):
             if 16 <= current_time_decimal < 18:  # Evening peak
                 _LOGGER.debug("Winter working day - Block 1 (Evening peak)")
                 return 1
-            elif (22 <= current_time_decimal < 24) or (0 <= current_time_decimal < 3) or (6 <= current_time_decimal < 7):
-                _LOGGER.debug("Winter working day - Block 3 (Night/early morning)")
+            elif (22 <= current_time_decimal < 24) or (0 <= current_time_decimal < 6):  # Night
+                _LOGGER.debug("Winter working day - Block 3 (Night)")
+                return 3
+            elif 6 <= current_time_decimal < 7:  # Early morning
+                _LOGGER.debug("Winter working day - Block 3 (Early morning)")
                 return 3
             else:
                 _LOGGER.debug("Winter working day - Block 2 (Regular)")
                 return 2
-        else:
-            if (22 <= current_time_decimal < 24) or (0 <= current_time_decimal < 6):
+        else:  # Summer
+            if (22 <= current_time_decimal < 24) or (0 <= current_time_decimal < 6):  # Night
                 _LOGGER.debug("Summer working day - Block 4 (Night)")
                 return 4
-            elif (6 <= current_time_decimal < 7) or (14 <= current_time_decimal < 17) or (20 <= current_time_decimal < 22):
-                _LOGGER.debug("Summer working day - Block 3 (Mid-peak)")
+            elif 6 <= current_time_decimal < 7:  # Early morning peak
+                _LOGGER.debug("Summer working day - Block 3 (Early morning)")
+                return 3
+            elif 14 <= current_time_decimal < 17:  # Afternoon peak
+                _LOGGER.debug("Summer working day - Block 3 (Afternoon)")
+                return 3
+            elif 20 <= current_time_decimal < 22:  # Evening peak
+                _LOGGER.debug("Summer working day - Block 3 (Evening)")
                 return 3
             else:
                 _LOGGER.debug("Summer working day - Block 2 (Regular)")
