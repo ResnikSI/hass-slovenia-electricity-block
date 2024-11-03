@@ -1,5 +1,5 @@
 """Platform for sensor integration."""
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 from typing import Any, Dict, Optional
 
@@ -41,18 +41,12 @@ async def async_setup_entry(
         CurrentBlockSensor(),
         CurrentSeasonSensor(),
         DayTypeSensor(),
+        NextBlockSensor(),
+        NextBlockTimeSensor(),
     ])
 
-class CurrentBlockSensor(SensorEntity):
-    """Sensor for current electricity block."""
-
-    _attr_name = "Current Electricity Block"
-    _attr_unique_id = "current_electricity_block"
-
-    def __init__(self) -> None:
-        """Initialize the sensor."""
-        self._attr_native_value = None
-        self._attr_extra_state_attributes: Dict[str, Any] = {}
+class BlockCalculationMixin:
+    """Mixin for block calculation methods."""
 
     def _is_higher_season(self, current_date: datetime) -> bool:
         """Determine if current date is in higher season (winter)."""
@@ -139,6 +133,44 @@ class CurrentBlockSensor(SensorEntity):
                 else:  # 20:00-22:00
                     return BLOCK_4
 
+    def _get_next_block_info(self, current_date: datetime) -> tuple[int, datetime]:
+        """Get next block and its start time."""
+        hour = current_date.hour
+        tr = TIME_RANGES
+        next_time = None
+        
+        # Find the next time block
+        if hour < tr["NIGHT_END"]:  # Before 06:00
+            next_time = current_date.replace(hour=tr["NIGHT_END"], minute=0, second=0, microsecond=0)
+        elif hour < tr["MORNING_END"]:  # Before 07:00
+            next_time = current_date.replace(hour=tr["MORNING_END"], minute=0, second=0, microsecond=0)
+        elif hour < tr["DAY1_END"]:  # Before 14:00
+            next_time = current_date.replace(hour=tr["DAY1_END"], minute=0, second=0, microsecond=0)
+        elif hour < tr["DAY2_END"]:  # Before 16:00
+            next_time = current_date.replace(hour=tr["DAY2_END"], minute=0, second=0, microsecond=0)
+        elif hour < tr["DAY3_END"]:  # Before 20:00
+            next_time = current_date.replace(hour=tr["DAY3_END"], minute=0, second=0, microsecond=0)
+        elif hour < tr["NIGHT_START"]:  # Before 22:00
+            next_time = current_date.replace(hour=tr["NIGHT_START"], minute=0, second=0, microsecond=0)
+        else:  # After 22:00, next block starts at 06:00 tomorrow
+            next_time = (current_date + timedelta(days=1)).replace(hour=tr["NIGHT_END"], minute=0, second=0, microsecond=0)
+        
+        # Get the block that will be active at next_time
+        next_block = self._get_current_block(next_time)
+        
+        return next_block, next_time
+
+class CurrentBlockSensor(BlockCalculationMixin, SensorEntity):
+    """Sensor for current electricity block."""
+
+    _attr_name = "Current Electricity Block"
+    _attr_unique_id = "current_electricity_block"
+
+    def __init__(self) -> None:
+        """Initialize the sensor."""
+        self._attr_native_value = None
+        self._attr_extra_state_attributes: Dict[str, Any] = {}
+
     def update(self) -> None:
         """Update the sensor."""
         current_date = datetime.now()
@@ -150,7 +182,7 @@ class CurrentBlockSensor(SensorEntity):
             "last_update": current_date.isoformat(),
         }
 
-class CurrentSeasonSensor(SensorEntity):
+class CurrentSeasonSensor(BlockCalculationMixin, SensorEntity):
     """Sensor for current season."""
 
     _attr_name = "Current Electricity Season"
@@ -160,25 +192,12 @@ class CurrentSeasonSensor(SensorEntity):
         """Initialize the sensor."""
         self._attr_native_value = None
 
-    def _is_higher_season(self, current_date: datetime) -> bool:
-        """Determine if current date is in higher season (winter)."""
-        month = current_date.month
-        day = current_date.day
-
-        if month == HIGHER_SEASON_START_MONTH and day >= HIGHER_SEASON_START_DAY:
-            return True
-        if month > HIGHER_SEASON_START_MONTH or month < HIGHER_SEASON_END_MONTH:
-            return True
-        if month == HIGHER_SEASON_END_MONTH and day <= HIGHER_SEASON_END_DAY:
-            return True
-        return False
-
     def update(self) -> None:
         """Update the sensor."""
         current_date = datetime.now()
         self._attr_native_value = SEASON_HIGHER if self._is_higher_season(current_date) else SEASON_LOWER
 
-class DayTypeSensor(SensorEntity):
+class DayTypeSensor(BlockCalculationMixin, SensorEntity):
     """Sensor for day type (working/non-working)."""
 
     _attr_name = "Electricity Working Day"
@@ -196,3 +215,46 @@ class DayTypeSensor(SensorEntity):
             current_date.strftime("%Y-%m-%d") not in HOLIDAYS
         )
         self._attr_native_value = DAY_TYPE_WORKING if is_working_day else DAY_TYPE_NON_WORKING
+
+class NextBlockSensor(BlockCalculationMixin, SensorEntity):
+    """Sensor for next electricity block."""
+
+    _attr_name = "Next Electricity Block"
+    _attr_unique_id = "next_electricity_block"
+
+    def __init__(self) -> None:
+        """Initialize the sensor."""
+        self._attr_native_value = None
+        self._attr_extra_state_attributes: Dict[str, Any] = {}
+
+    def update(self) -> None:
+        """Update the sensor."""
+        current_date = datetime.now()
+        next_block, _ = self._get_next_block_info(current_date)
+        
+        self._attr_native_value = next_block
+        self._attr_extra_state_attributes = {
+            "block_description": BLOCK_DESCRIPTIONS[next_block],
+            "last_update": current_date.isoformat(),
+        }
+
+class NextBlockTimeSensor(BlockCalculationMixin, SensorEntity):
+    """Sensor for next block start time."""
+
+    _attr_name = "Next Block Start Time"
+    _attr_unique_id = "next_block_start_time"
+
+    def __init__(self) -> None:
+        """Initialize the sensor."""
+        self._attr_native_value = None
+        self._attr_extra_state_attributes: Dict[str, Any] = {}
+
+    def update(self) -> None:
+        """Update the sensor."""
+        current_date = datetime.now()
+        _, next_time = self._get_next_block_info(current_date)
+        
+        self._attr_native_value = next_time.isoformat()
+        self._attr_extra_state_attributes = {
+            "last_update": current_date.isoformat(),
+        }

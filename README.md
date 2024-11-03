@@ -42,6 +42,30 @@ A Home Assistant integration for tracking Slovenian electricity pricing blocks. 
 7. 20:00 - 22:00 block 4
 8. 22:00 - 00:00 block 5
 
+## Sensors
+
+The integration provides five sensors:
+
+1. Current Electricity Block (1-5)
+   - Shows the current active block
+   - Includes block description attribute
+
+2. Current Electricity Season
+   - "high" (Winter season: Nov 1 - Feb 28/29)
+   - "low" (Summer season: Mar 1 - Oct 31)
+
+3. Electricity Working Day
+   - "work-day"
+   - "non-work-day"
+
+4. Next Electricity Block (1-5)
+   - Shows the upcoming block
+   - Includes block description attribute
+
+5. Next Block Start Time
+   - Shows when the next block will come into effect
+   - ISO format timestamp
+
 ## Installation
 
 ### HACS Installation (Recommended)
