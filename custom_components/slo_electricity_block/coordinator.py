@@ -64,47 +64,52 @@ class SloveniaElectricityBlockCoordinator(DataUpdateCoordinator):
             f"Day type: {'working' if is_working_day else 'non-working'}"
         )
 
-        # Non-working days (weekends and holidays)
-        if not is_working_day:
-            if is_winter:
-                _LOGGER.debug("Winter weekend/holiday - Block 3 (MT)")
-                return 3
-            else:
-                _LOGGER.debug("Summer weekend/holiday - Block 4 (MT)")
-                return 4
-
-        # Working days
         if is_winter:
-            # Winter season working day (November-February)
-            if 16 <= time_decimal < 18:  # VT1 (Block 1) - Peak
-                _LOGGER.debug("Winter working day - Block 1 (VT1) - Peak")
+            # Winter season (November-February)
+            if 0 <= time_decimal < 6:  # Period 1
+                _LOGGER.debug("Winter - Block 3 (MT) - Night (00:00-06:00)")
+                return 3
+            elif 6 <= time_decimal < 7:  # Period 2
+                _LOGGER.debug("Winter - Block 3 (MT) - Early Morning (06:00-07:00)")
+                return 3
+            elif 7 <= time_decimal < 14:  # Period 3
+                _LOGGER.debug("Winter - Block 2 (VT2) - Morning (07:00-14:00)")
+                return 2
+            elif 14 <= time_decimal < 16:  # Period 4
+                _LOGGER.debug("Winter - Block 2 (VT2) - Afternoon (14:00-16:00)")
+                return 2
+            elif 16 <= time_decimal < 18:  # Period 5
+                _LOGGER.debug("Winter - Block 1 (VT1) - Peak (16:00-18:00)")
                 return 1
-            elif (22 <= time_decimal <= 24) or (0 <= time_decimal < 6):  # MT (Block 3) - Night
-                _LOGGER.debug("Winter working day - Block 3 (MT) - Night")
-                return 3
-            elif 6 <= time_decimal < 7:  # MT (Block 3) - Early morning
-                _LOGGER.debug("Winter working day - Block 3 (MT) - Early morning")
-                return 3
-            else:  # VT2 (Block 2) - Regular hours (7-16 and 18-22)
-                _LOGGER.debug(f"Winter working day - Block 2 (VT2) - Regular at {hour}:{minute}")
+            elif 18 <= time_decimal < 22:  # Period 6
+                _LOGGER.debug("Winter - Block 2 (VT2) - Evening (18:00-22:00)")
                 return 2
+            else:  # Period 7: 22 <= time_decimal <= 24
+                _LOGGER.debug("Winter - Block 3 (MT) - Late Night (22:00-24:00)")
+                return 3
         else:
-            # Summer season working day (March-October)
-            if (22 <= time_decimal <= 24) or (0 <= time_decimal < 6):  # MT (Block 4) - Night
-                _LOGGER.debug("Summer working day - Block 4 (MT) - Night")
+            # Summer season (March-October)
+            if 0 <= time_decimal < 6:  # Period 1
+                _LOGGER.debug("Summer - Block 4 (MT) - Night (00:00-06:00)")
                 return 4
-            elif 6 <= time_decimal < 7:  # VT (Block 3) - Early morning
-                _LOGGER.debug("Summer working day - Block 3 (VT) - Early morning")
+            elif 6 <= time_decimal < 7:  # Period 2
+                _LOGGER.debug("Summer - Block 3 (VT) - Early Morning (06:00-07:00)")
                 return 3
-            elif 14 <= time_decimal < 17:  # VT (Block 3) - Afternoon
-                _LOGGER.debug("Summer working day - Block 3 (VT) - Afternoon")
-                return 3
-            elif 20 <= time_decimal < 22:  # VT (Block 3) - Evening
-                _LOGGER.debug("Summer working day - Block 3 (VT) - Evening")
-                return 3
-            else:  # VT (Block 2) - Regular hours (7-14, 17-20)
-                _LOGGER.debug(f"Summer working day - Block 2 (VT) - Regular at {hour}:{minute}")
+            elif 7 <= time_decimal < 14:  # Period 3
+                _LOGGER.debug("Summer - Block 2 (VT) - Morning (07:00-14:00)")
                 return 2
+            elif 14 <= time_decimal < 17:  # Period 4
+                _LOGGER.debug("Summer - Block 3 (VT) - Afternoon (14:00-17:00)")
+                return 3
+            elif 17 <= time_decimal < 20:  # Period 5
+                _LOGGER.debug("Summer - Block 2 (VT) - Evening (17:00-20:00)")
+                return 2
+            elif 20 <= time_decimal < 22:  # Period 6
+                _LOGGER.debug("Summer - Block 3 (VT) - Late Evening (20:00-22:00)")
+                return 3
+            else:  # Period 7: 22 <= time_decimal <= 24
+                _LOGGER.debug("Summer - Block 4 (MT) - Late Night (22:00-24:00)")
+                return 4
 
     async def _async_update_data(self):
         """Update data."""
