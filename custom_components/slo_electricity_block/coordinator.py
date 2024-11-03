@@ -54,6 +54,7 @@ class SloveniaElectricityBlockCoordinator(DataUpdateCoordinator):
         """Get the current block number based on time and day type."""
         hour = current_time.hour
         minute = current_time.minute
+        time_decimal = hour + minute / 60
         is_working_day = self._is_working_day(current_time)
         is_winter = self._is_winter_season(current_time)
 
@@ -75,33 +76,33 @@ class SloveniaElectricityBlockCoordinator(DataUpdateCoordinator):
         # Working days
         if is_winter:
             # Winter season working day
-            if hour >= 16 and hour < 18:  # Peak hours
+            if 16 <= time_decimal < 18:  # VT1 (Block 1)
                 _LOGGER.debug("Winter working day - Block 1 (VT1)")
                 return 1
-            elif hour >= 22 or hour < 6:  # Night
+            elif (22 <= time_decimal < 24) or (0 <= time_decimal < 6):  # MT (Block 3)
                 _LOGGER.debug("Winter working day - Block 3 (MT)")
                 return 3
-            elif hour == 6:  # Early morning
+            elif 6 <= time_decimal < 7:  # MT (Block 3)
                 _LOGGER.debug("Winter working day - Block 3 (MT)")
                 return 3
-            else:  # Regular hours
+            else:  # VT2 (Block 2)
                 _LOGGER.debug("Winter working day - Block 2 (VT2)")
                 return 2
         else:
             # Summer season working day
-            if hour >= 22 or hour < 6:  # Night
+            if (22 <= time_decimal < 24) or (0 <= time_decimal < 6):  # MT (Block 4)
                 _LOGGER.debug("Summer working day - Block 4 (MT)")
                 return 4
-            elif hour == 6:  # Early morning
+            elif 6 <= time_decimal < 7:  # VT (Block 3)
                 _LOGGER.debug("Summer working day - Block 3 (VT)")
                 return 3
-            elif (hour >= 14 and hour < 17):  # Afternoon peak
+            elif 14 <= time_decimal < 17:  # VT (Block 3)
                 _LOGGER.debug("Summer working day - Block 3 (VT)")
                 return 3
-            elif (hour >= 20 and hour < 22):  # Evening peak
+            elif 20 <= time_decimal < 22:  # VT (Block 3)
                 _LOGGER.debug("Summer working day - Block 3 (VT)")
                 return 3
-            else:  # Regular hours
+            else:  # VT (Block 2)
                 _LOGGER.debug(f"Summer working day - Block 2 (VT) at {hour}:{minute}")
                 return 2
 
