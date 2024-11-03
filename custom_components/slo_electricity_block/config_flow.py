@@ -9,6 +9,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers import selector
 
 from .const import (
     DOMAIN,
@@ -17,6 +18,7 @@ from .const import (
     CONF_POWER_LIMIT_3,
     CONF_POWER_LIMIT_4,
     CONF_POWER_LIMIT_5,
+    CONF_POWER_METER,
     DEFAULT_POWER_LIMIT,
 )
 
@@ -42,13 +44,44 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="single_instance_allowed")
 
         if user_input is not None:
-            await self.async_set_unique_id(DOMAIN)
+            return await self.async_step_power_limits(user_input)
+
+        # Show power meter selection form
+        return self.async_show_form(
+            step_id="user",
+            data_schema=vol.Schema({
+                vol.Optional(CONF_POWER_METER): selector.EntitySelector(
+                    selector.EntitySelectorConfig(
+                        domain=["sensor", "number"],
+                        device_class=["power", "current"],
+                    ),
+                ),
+            }),
+            description_placeholders={
+                "name": "Slovenian Electricity Block",
+                "description": "Select your power meter sensor (optional)"
+            },
+            errors=errors,
+        )
+
+    async def async_step_power_limits(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle the power limits step."""
+        errors = {}
+
+        if user_input is not None:
+            # Merge power meter and power limits data
+            data = {**self.init_data, **user_input}
             return self.async_create_entry(
                 title="Slovenian Electricity Block",
-                data=user_input,
+                data=data,
             )
 
-        # Show configuration form with power limit inputs
+        # Store power meter data for later
+        self.init_data = user_input or {}
+
+        # Show power limits configuration form
         data_schema = {
             vol.Required(CONF_POWER_LIMIT_1, default=DEFAULT_POWER_LIMIT): vol.Coerce(float),
             vol.Required(CONF_POWER_LIMIT_2, default=DEFAULT_POWER_LIMIT): vol.Coerce(float),
@@ -58,7 +91,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         }
 
         return self.async_show_form(
-            step_id="user",
+            step_id="power_limits",
             data_schema=vol.Schema(data_schema),
             description_placeholders={
                 "name": "Slovenian Electricity Block",

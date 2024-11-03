@@ -44,17 +44,24 @@ A Home Assistant integration for tracking Slovenian electricity pricing blocks. 
 
 ## Configuration
 
-During installation, you'll need to configure your agreed power limits ("dogovorjena obračunska moč") for each time block:
+During installation, you'll need to configure:
 
-1. Block 1 (kW) - Highest rate periods
-2. Block 2 (kW) - High rate periods
-3. Block 3 (kW) - Medium rate periods
-4. Block 4 (kW) - Low rate periods
-5. Block 5 (kW) - Lowest rate periods
+1. Power Meter (optional)
+   - Select your power monitoring sensor
+   - Enables automatic power limit monitoring
+   - Must be a sensor with power or current readings
+
+2. Power Limits
+   - Set your agreed power limits ("dogovorjena obračunska moč") for each block:
+   - Block 1 (kW) - Highest rate periods
+   - Block 2 (kW) - High rate periods
+   - Block 3 (kW) - Medium rate periods
+   - Block 4 (kW) - Low rate periods
+   - Block 5 (kW) - Lowest rate periods
 
 ## Sensors
 
-The integration provides five sensors:
+The integration provides the following sensors:
 
 1. Current Electricity Block (1-5)
    - Shows the current active block
@@ -78,35 +85,15 @@ The integration provides five sensors:
    - Shows when the next block will come into effect
    - ISO format timestamp
 
-## Power Limit Monitoring
+6. Power Limit Status (only if power meter configured)
+   - Shows current power usage status
+   - States: normal/warning/exceeded
+   - Attributes:
+     * current_usage: Current power consumption
+     * current_limit: Current block's power limit
+     * percentage_used: Percentage of limit used
 
-To monitor if you're exceeding your power limit, you can create a template sensor in your Home Assistant configuration. Here's an example:
-
-```yaml
-template:
-  - sensor:
-      - name: "Power Limit Status"
-        state: >
-          {% set current_power = states('sensor.your_power_meter')|float(0) %}
-          {% set current_block = states('sensor.current_electricity_block') %}
-          {% set block_limit = states.sensor.current_electricity_block.attributes.power_limit|float(0) %}
-          {% if current_power > block_limit %}
-            exceeded
-          {% elif current_power > (block_limit * 0.9) %}
-            warning
-          {% else %}
-            normal
-          {% endif %}
-        attributes:
-          current_usage: "{{ states('sensor.your_power_meter')|float(0) }}"
-          current_limit: "{{ states.sensor.current_electricity_block.attributes.power_limit|float(0) }}"
-          percentage_used: >
-            {% set current_power = states('sensor.your_power_meter')|float(0) %}
-            {% set block_limit = states.sensor.current_electricity_block.attributes.power_limit|float(0) %}
-            {{ (current_power / block_limit * 100)|round(1) if block_limit > 0 else 0 }}
-```
-
-### Lovelace Card Example
+## Lovelace Card Example
 
 Here's an example of a Lovelace card that shows your power usage and limit:
 
@@ -129,13 +116,14 @@ cards:
 
   - type: gauge
     title: Power Usage
-    entity: sensor.your_power_meter
+    entity: sensor.power_limit_status
+    attribute: percentage_used
     min: 0
-    max: "{{ states.sensor.current_electricity_block.attributes.power_limit }}"
+    max: 100
     severity:
       green: 0
-      yellow: "{{ states.sensor.current_electricity_block.attributes.power_limit * 0.9 }}"
-      red: "{{ states.sensor.current_electricity_block.attributes.power_limit }}"
+      yellow: 90
+      red: 100
     needle: true
 
   - type: glance
@@ -151,14 +139,15 @@ cards:
           {% else %}
             mdi:check-circle
           {% endif %}
-      - entity: sensor.your_power_meter
+      - entity: sensor.power_limit_status
         name: Current Usage
-      - entity: sensor.current_electricity_block
+        attribute: current_usage
+      - entity: sensor.power_limit_status
         name: Block Limit
-        state: "{{ state_attr('sensor.current_electricity_block', 'power_limit') }}"
+        attribute: current_limit
 ```
 
-You can then create an automation to notify you when approaching or exceeding the limit:
+You can also create an automation to notify you when approaching or exceeding the limit:
 
 ```yaml
 automation:
@@ -180,8 +169,6 @@ automation:
               Power usage ({{ trigger.to_state.attributes.current_usage }}kW) is approaching the limit ({{ trigger.to_state.attributes.current_limit }}kW)
             {% endif %}
 ```
-
-Note: Replace `sensor.your_power_meter` with your actual power monitoring sensor entity ID.
 
 ## Installation
 

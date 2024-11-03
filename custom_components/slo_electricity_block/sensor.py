@@ -8,6 +8,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
+from homeassistant.helpers.event import async_track_state_change_event
 
 from .const import (
     BLOCK_1,
@@ -16,11 +17,7 @@ from .const import (
     BLOCK_4,
     BLOCK_5,
     BLOCK_DESCRIPTIONS,
-    CONF_POWER_LIMIT_1,
-    CONF_POWER_LIMIT_2,
-    CONF_POWER_LIMIT_3,
-    CONF_POWER_LIMIT_4,
-    CONF_POWER_LIMIT_5,
+    CONF_POWER_METER,
     DAY_TYPE_NON_WORKING,
     DAY_TYPE_WORKING,
     DOMAIN,
@@ -43,13 +40,19 @@ async def async_setup_entry(
 ) -> None:
     """Set up the sensor platform."""
     config_data = config_entry.data
-    async_add_entities([
+    entities = [
         CurrentBlockSensor(config_data),
         CurrentSeasonSensor(),
         DayTypeSensor(),
         NextBlockSensor(config_data),
         NextBlockTimeSensor(),
-    ])
+    ]
+
+    # Add power limit status sensor if power meter is configured
+    if CONF_POWER_METER in config_data and config_data[CONF_POWER_METER]:
+        entities.append(PowerLimitStatusSensor(config_data))
+
+    async_add_entities(entities)
 
 class BlockCalculationMixin:
     """Mixin for block calculation methods."""
@@ -184,7 +187,7 @@ class CurrentBlockSensor(BlockCalculationMixin, SensorEntity):
         current_block = self._get_current_block(current_date)
         
         # Get power limit for current block
-        power_limit_key = f"power_limit_{current_block}"
+        power_limit_key = f"Block {current_block}"
         power_limit = self._config_data.get(power_limit_key, 0)
         
         self._attr_native_value = current_block
@@ -246,7 +249,7 @@ class NextBlockSensor(BlockCalculationMixin, SensorEntity):
         next_block, _ = self._get_next_block_info(current_date)
         
         # Get power limit for next block
-        power_limit_key = f"power_limit_{next_block}"
+        power_limit_key = f"Block {next_block}"
         power_limit = self._config_data.get(power_limit_key, 0)
         
         self._attr_native_value = next_block
@@ -276,3 +279,65 @@ class NextBlockTimeSensor(BlockCalculationMixin, SensorEntity):
         self._attr_extra_state_attributes = {
             "last_update": current_date.isoformat(),
         }
+
+class PowerLimitStatusSensor(BlockCalculationMixin, SensorEntity):
+    """Sensor for power limit status."""
+
+    _attr_name = "Power Limit Status"
+    _attr_unique_id = "power_limit_status"
+
+    def __init__(self, config_data: dict) -> None:
+        """Initialize the sensor."""
+        self._attr_native_value = None
+        self._attr_extra_state_attributes: Dict[str, Any] = {}
+        self._config_data = config_data
+        self._power_meter = config_data.get(CONF_POWER_METER)
+
+    async def async_added_to_hass(self) -> None:
+        """Register callbacks."""
+        if self._power_meter:
+            self.async_on_remove(
+                async_track_state_change_event(
+                    self.hass, [self._power_meter], self._handle_power_meter_change
+                )
+            )
+
+    async def _handle_power_meter_change(self, event) -> None:
+        """Handle power meter state changes."""
+        self.async_schedule_update_ha_state(True)
+
+    def update(self) -> None:
+        """Update the sensor."""
+        if not self._power_meter:
+            self._attr_native_value = "unavailable"
+            return
+
+        current_date = datetime.now()
+        current_block = self._get_current_block(current_date)
+        power_limit_key = f"Block {current_block}"
+        block_limit = float(self._config_data.get(power_limit_key, 0))
+
+        try:
+            current_power = float(self.hass.states.get(self._power_meter).state)
+            percentage_used = (current_power / block_limit * 100) if block_limit > 0 else 0
+
+            if current_power > block_limit:
+                status = "exceeded"
+            elif current_power > (block_limit * 0.9):
+                status = "warning"
+            else:
+                status = "normal"
+
+            self._attr_native_value = status
+            self._attr_extra_state_attributes = {
+                "current_usage": current_power,
+                "current_limit": block_limit,
+                "percentage_used": round(percentage_used, 1),
+                "last_update": current_date.isoformat(),
+            }
+        except (ValueError, AttributeError):
+            self._attr_native_value = "error"
+            self._attr_extra_state_attributes = {
+                "error": "Failed to read power meter",
+                "last_update": current_date.isoformat(),
+            }
