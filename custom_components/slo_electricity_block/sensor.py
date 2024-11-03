@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -22,6 +21,12 @@ from .coordinator import SloveniaElectricityBlockCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
+ENTITY_DESCRIPTION = SensorEntityDescription(
+    key="current_block",
+    name="Current Electricity Block",
+    icon="mdi:flash",
+)
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -29,28 +34,38 @@ async def async_setup_entry(
 ) -> None:
     """Set up the sensor platform."""
     _LOGGER.debug("Setting up Slovenia Electricity Block sensor platform")
-    coordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([SloveniaElectricityBlockSensor(coordinator)], True)
+    coordinator: SloveniaElectricityBlockCoordinator = hass.data[DOMAIN][entry.entry_id]
 
-class SloveniaElectricityBlockSensor(CoordinatorEntity, SensorEntity):
+    async_add_entities(
+        [SloveniaElectricityBlockSensor(coordinator, ENTITY_DESCRIPTION)],
+        True,
+    )
+
+class SloveniaElectricityBlockSensor(CoordinatorEntity[SloveniaElectricityBlockCoordinator], SensorEntity):
     """Representation of Slovenia Electricity Block Sensor."""
 
-    _attr_has_entity_name = True
-    _attr_name = None
-    _attr_unique_id = "slovenia_electricity_block"
+    entity_description: SensorEntityDescription
 
-    def __init__(self, coordinator: SloveniaElectricityBlockCoordinator) -> None:
+    def __init__(
+        self,
+        coordinator: SloveniaElectricityBlockCoordinator,
+        description: SensorEntityDescription,
+    ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
+        self.entity_description = description
+        self._attr_unique_id = f"{DOMAIN}_{description.key}"
         _LOGGER.debug("Initializing Slovenia Electricity Block sensor")
 
     @property
     def native_value(self) -> StateType:
         """Return the state of the sensor."""
-        return self.coordinator.data.get("block") if self.coordinator.data else None
+        if not self.coordinator.data:
+            return None
+        return self.coordinator.data.get("block")
 
     @property
-    def extra_state_attributes(self) -> dict[str, Any]:
+    def extra_state_attributes(self) -> dict:
         """Return the state attributes."""
         if not self.coordinator.data:
             return {}

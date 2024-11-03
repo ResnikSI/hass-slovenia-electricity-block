@@ -73,3 +73,13 @@ content: >
   Season: {{ state_attr('sensor.current_electricity_block', 'season') }}
   
   Last Updated: {{ state_attr('sensor.current_electricity_block', 'last_update') }}
+```
+
+## Troubleshooting
+
+If you encounter any issues:
+
+1. Check the Home Assistant logs (Settings > System > Logs)
+2. Look for entries containing "slo_electricity_block"
+3. Make sure you've restarted Home Assistant after installation
+4. Verify the integration appears in Settings > Devices & Services
