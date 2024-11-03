@@ -63,8 +63,8 @@ class SloveniaElectricityBlockCoordinator(DataUpdateCoordinator):
             f"Day type: {'working' if is_working_day else 'non-working'}"
         )
 
+        # Non-working days (weekends and holidays)
         if not is_working_day:
-            # Weekend/Holiday rules
             if is_winter:
                 _LOGGER.debug("Winter weekend/holiday - Block 3 (MT)")
                 return 3
@@ -72,19 +72,16 @@ class SloveniaElectricityBlockCoordinator(DataUpdateCoordinator):
                 _LOGGER.debug("Summer weekend/holiday - Block 4 (MT)")
                 return 4
 
-        # Working day rules
+        # Working days
         if is_winter:
             # Winter season working day
-            if hour >= 22 or hour < 6:  # Night
-                _LOGGER.debug("Winter working day - Block 3 (MT)")
-                return 3
-            elif hour == 6:  # Early morning
-                _LOGGER.debug("Winter working day - Block 3 (MT)")
-                return 3
-            elif hour >= 16 and hour < 18:  # Peak
+            if hour >= 16 and hour < 18:  # Peak hours
                 _LOGGER.debug("Winter working day - Block 1 (VT1)")
                 return 1
-            else:
+            elif (hour >= 22 or hour < 6) or hour == 6:  # Night and early morning
+                _LOGGER.debug("Winter working day - Block 3 (MT)")
+                return 3
+            else:  # Regular hours
                 _LOGGER.debug("Winter working day - Block 2 (VT2)")
                 return 2
         else:
@@ -92,13 +89,10 @@ class SloveniaElectricityBlockCoordinator(DataUpdateCoordinator):
             if hour >= 22 or hour < 6:  # Night
                 _LOGGER.debug("Summer working day - Block 4 (MT)")
                 return 4
-            elif hour == 6:  # Early morning
+            elif hour == 6 or (hour >= 14 and hour < 17) or (hour >= 20 and hour < 22):  # Peak periods
                 _LOGGER.debug("Summer working day - Block 3 (VT)")
                 return 3
-            elif (hour >= 14 and hour < 17) or (hour >= 20 and hour < 22):  # Peak periods
-                _LOGGER.debug("Summer working day - Block 3 (VT)")
-                return 3
-            else:
+            else:  # Regular hours
                 _LOGGER.debug("Summer working day - Block 2 (VT)")
                 return 2
 
