@@ -71,9 +71,9 @@ BLOCK_DESCRIPTIONS = {
 }
 
 # Season descriptions
-SEASON_HIGHER = "Higher Season (Winter)"
-SEASON_LOWER = "Lower Season (Summer)"
+SEASON_HIGHER = "high"
+SEASON_LOWER = "low"
 
 # Day type descriptions
-DAY_TYPE_WORKING = "Working Day"
-DAY_TYPE_NON_WORKING = "Non-Working Day"
+DAY_TYPE_WORKING = "work-day"
+DAY_TYPE_NON_WORKING = "non-work-day"
