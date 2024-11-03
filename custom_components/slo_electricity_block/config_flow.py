@@ -9,6 +9,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers import selector
 
 from .const import (
     DOMAIN,
@@ -17,6 +18,7 @@ from .const import (
     CONF_POWER_LIMIT_3,
     CONF_POWER_LIMIT_4,
     CONF_POWER_LIMIT_5,
+    CONF_POWER_METER,
     DEFAULT_POWER_LIMIT,
 )
 
@@ -42,14 +44,19 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="single_instance_allowed")
 
         if user_input is not None:
-            await self.async_set_unique_id(DOMAIN)
             return self.async_create_entry(
                 title="Slovenian Electricity Block",
                 data=user_input,
             )
 
-        # Show configuration form with power limit inputs
+        # Show configuration form with power meter and power limits
         data_schema = {
+            vol.Optional(CONF_POWER_METER): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain=["sensor", "number"],
+                    device_class=["power", "current"],
+                ),
+            ),
             vol.Required(CONF_POWER_LIMIT_1, default=DEFAULT_POWER_LIMIT): vol.Coerce(float),
             vol.Required(CONF_POWER_LIMIT_2, default=DEFAULT_POWER_LIMIT): vol.Coerce(float),
             vol.Required(CONF_POWER_LIMIT_3, default=DEFAULT_POWER_LIMIT): vol.Coerce(float),
@@ -62,7 +69,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(data_schema),
             description_placeholders={
                 "name": "Slovenian Electricity Block",
-                "description": "Set agreed power limits (kW) for each time block"
+                "description": "Set power meter and agreed power limits (kW) for each block"
             },
             errors=errors,
         )
