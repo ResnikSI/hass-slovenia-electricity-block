@@ -1,24 +1,20 @@
 """Slovenia Electricity Block Sensor."""
+from __future__ import annotations
+
 from datetime import datetime
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
-import voluptuous as vol
-
-from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
-from homeassistant.const import CONF_NAME
-import homeassistant.helpers.config_validation as cv
+from homeassistant.components.sensor import (
+    SensorEntity,
+    SensorEntityDescription,
+)
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
+from homeassistant.helpers.typing import StateType
 
 _LOGGER = logging.getLogger(__name__)
-
-DEFAULT_NAME = "Electricity Block"
-
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
-    vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
-})
 
 WINTER_BLOCKS = [
     # Block 3
@@ -58,39 +54,25 @@ SUMMER_BLOCKS = [
     [(22, 0), (24, 0)]
 ]
 
-def setup_platform(
+async def async_setup_entry(
     hass: HomeAssistant,
-    config: ConfigType,
-    add_entities: AddEntitiesCallback,
-    discovery_info: Optional[DiscoveryInfoType] = None
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the sensor platform."""
-    name = config.get(CONF_NAME)
-    add_entities([SloveniaElectricityBlockSensor(name)], True)
+    async_add_entities([SloveniaElectricityBlockSensor()], True)
 
 class SloveniaElectricityBlockSensor(SensorEntity):
     """Representation of Slovenia Electricity Block Sensor."""
 
-    def __init__(self, name):
+    _attr_name = "Current Electricity Block"
+    _attr_unique_id = "slovenia_electricity_block"
+    _attr_native_unit_of_measurement = None
+    _attr_has_entity_name = True
+
+    def __init__(self) -> None:
         """Initialize the sensor."""
-        self._name = name
-        self._state = None
-        self._attrs: Dict[str, Any] = {}
-
-    @property
-    def name(self):
-        """Return the name of the sensor."""
-        return self._name
-
-    @property
-    def state(self):
-        """Return the state of the sensor."""
-        return self._state
-
-    @property
-    def extra_state_attributes(self):
-        """Return the state attributes."""
-        return self._attrs
+        self._attr_extra_state_attributes = {}
 
     def _is_winter_season(self, current_date: datetime) -> bool:
         """Determine if current date is in winter season."""
@@ -102,7 +84,7 @@ class SloveniaElectricityBlockSensor(SensorEntity):
             return True
         return False
 
-    def _get_current_block(self, current_time: datetime) -> int:
+    def _get_current_block(self, current_time: datetime) -> StateType:
         """Get the current block number based on time."""
         hour = current_time.hour
         minute = current_time.minute
@@ -136,9 +118,9 @@ class SloveniaElectricityBlockSensor(SensorEntity):
     def update(self) -> None:
         """Fetch new state data for the sensor."""
         now = datetime.now()
-        self._state = self._get_current_block(now)
+        self._attr_native_value = self._get_current_block(now)
         
-        self._attrs = {
+        self._attr_extra_state_attributes = {
             "season": "winter" if self._is_winter_season(now) else "summer",
             "last_update": now.isoformat()
         }
