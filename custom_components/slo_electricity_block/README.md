@@ -1,15 +1,16 @@
 # Slovenia Electricity Block Sensor
 
-A Home Assistant integration that shows the current electricity pricing block in Slovenia's new 5-block system.
+A Home Assistant integration that shows the current electricity pricing block and season in Slovenia's new 5-block system.
 
 ## Features
 
-- Automatically determines winter season (Nov 1 - Feb 28) or summer season (Mar 1 - Oct 31)
+- Automatically determines winter (higher) season and summer (lower) season
 - Shows current block number based on time of day
+- Provides two sensors:
+  1. Current Electricity Block (1-4)
+  2. Current Electricity Season (Higher/Lower)
 - Updates every minute
-- Includes additional attributes:
-  - season: current season (winter/summer)
-  - last_update: timestamp of last update
+- Includes additional attributes for detailed information
 
 ## Installation
 
@@ -37,8 +38,9 @@ A Home Assistant integration that shows the current electricity pricing block in
 5. Search for "Slovenia Electricity Block"
 6. Click to configure
 
-## Block Meanings
+## Block and Season Information
 
+### Block Meanings
 Winter Season (Nov 1 - Feb 28):
 - Block 1: Highest peak (16:00-18:00)
 - Block 2: Regular usage
@@ -49,17 +51,21 @@ Summer Season (Mar 1 - Oct 31):
 - Block 3: Mid-peak periods
 - Block 4: Night block (22:00-06:00)
 
+### Seasons
+- Higher Season (Winter): November 1 to February 28/29
+- Lower Season (Summer): March 1 to October 31
+
 ## Example Card Configuration
 
-You can create a custom card in your dashboard to display the current block. Here's an example using an entities card:
+You can create a custom card in your dashboard to display both sensors. Here's an example using an entities card:
 
 ```yaml
 type: entities
 entities:
   - entity: sensor.current_electricity_block
-    name: Current Electricity Block
-    secondary_info: attribute
-    secondary_info_attribute: season
+    name: Current Block
+  - entity: sensor.current_electricity_season
+    name: Current Season
 ```
 
 Or using a Markdown card for more detailed information:
@@ -67,10 +73,10 @@ Or using a Markdown card for more detailed information:
 ```yaml
 type: markdown
 content: >
-  ## Electricity Block Info
+  ## Electricity Information
   Current Block: {{ states('sensor.current_electricity_block') }}
   
-  Season: {{ state_attr('sensor.current_electricity_block', 'season') }}
+  Season: {{ states('sensor.current_electricity_season') }}
   
   Last Updated: {{ state_attr('sensor.current_electricity_block', 'last_update') }}
 ```
