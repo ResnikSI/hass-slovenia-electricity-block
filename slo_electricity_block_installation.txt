@@ -1,0 +1,58 @@
+Installation Instructions for Slovenia Electricity Block Sensor
+
+Method 1: Manual Installation
+----------------------------
+1. Locate your Home Assistant configuration directory (where your configuration.yaml is)
+2. Create a directory called 'custom_components' if it doesn't exist
+3. Extract the contents of slo_electricity_block.zip into the custom_components directory
+   - You should end up with: custom_components/slo_electricity_block/
+4. Add the following to your configuration.yaml:
+
+   sensor:
+     - platform: slo_electricity_block
+       name: Current Electricity Block
+
+5. Restart Home Assistant
+6. The sensor should now appear as "Current Electricity Block" in your entities
+
+Method 2: Using HACS (Home Assistant Community Store)
+--------------------------------------------------
+1. In HACS, click the three dots in the top right
+2. Choose "Custom repositories"
+3. Add the repository URL (if you host it on GitHub)
+4. Category: Integration
+5. Click Add
+6. Install through HACS interface
+7. Add the configuration to configuration.yaml as shown above
+8. Restart Home Assistant
+
+Adding to Your Dashboard
+----------------------
+Here's an example of how to add it to your dashboard using a Markdown card:
+
+type: markdown
+content: >
+  ## Electricity Block Info
+  Current Block: {{ states('sensor.current_electricity_block') }}
+  
+  Season: {{ state_attr('sensor.current_electricity_block', 'season') }}
+  
+  Last Updated: {{ state_attr('sensor.current_electricity_block', 'last_update') }}
+
+Or using an entities card:
+
+type: entities
+entities:
+  - entity: sensor.current_electricity_block
+    name: Current Electricity Block
+    secondary_info: attribute
+    secondary_info_attribute: season
+
+Troubleshooting
+--------------
+1. After installation, check Home Assistant logs for any errors
+2. Verify the sensor appears in Developer Tools > States
+3. If the sensor doesn't appear, try:
+   - Check configuration.yaml syntax
+   - Clear browser cache
+   - Restart Home Assistant

@@ -1,0 +1,11 @@
+{
+  "domain": "slo_electricity_block",
+  "name": "Slovenia Electricity Block",
+  "documentation": "https://github.com/resniksi/hass-slovenia-electricity-block",
+  "issue_tracker": "https://github.com/resniksi/hass-slovenia-electricity-block/issues",
+  "dependencies": [],
+  "codeowners": ["@resniksi"],
+  "requirements": [],
+  "version": "1.0.0",
+  "iot_class": "calculated"
+}

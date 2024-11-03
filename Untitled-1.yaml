@@ -1,0 +1,656 @@
+type: grid
+columns: 7
+square: false
+cards:
+  - type: custom:button-card
+    entity: sensor.a14_power
+    show_name: false
+    aspect_ratio: 120/200
+    show_entity_picture: true
+    show_icon: false
+    show_state: true
+    styles:
+        card:
+          - "--keep-background": "true"
+          - border-radius: 5%
+          - padding: "-10%"
+          - color: white
+          - text-transform: uppercase
+          - font-weight: bold
+          - position: relative
+          - overflow: hidden
+          - background-color: "#000000"
+          - border: |
+              [[[
+                return entity.state === 'unavailable' || entity.state === 'unknown' ? '2px solid red' : 'none';
+              ]]]
+          - animation: |
+              [[[
+                return entity.state === 'unavailable' || entity.state === 'unknown' ? 'blink 1s linear infinite' : 'none';
+              ]]]
+      custom_fields:
+        notification:
+          - position: absolute
+          - left: "-25%"
+          - top: "-25%"
+          - width: 150%
+          - height: 150%
+          - background-image: |
+              [[[ return  `url("/local/solarpanel_simple.jpeg")`; ]]]
+          - background-size: contain
+          - background-position: center
+          - background-repeat: no-repeat
+          - transform: rotate(90deg)
+          - filter: |
+              [[[
+                return "brightness("+Math.min(100*(Math.round(Number(entity.state)) / 440 + 0.2), 100) + "%)"
+              ]]]
+          - z-index: 1
+      state:
+        - position: relative
+        - z-index: 2
+        - text-shadow: 0px 0px 5px black
+    custom_fields:
+      notification: " "
+    state_display: |
+      [[[
+        return Math.round(Number(entity.state))+" W" 
+      ]]]
+  - type: custom:button-card
+    entity: sensor.a13_power
+    show_name: false
+    aspect_ratio: 120/200
+    show_entity_picture: true
+    show_icon: false
+    show_state: true
+    styles:
+      card:
+        - "--keep-background": "true"
+        - border-radius: 5%
+        - padding: "-10%"
+        - color: white
+        - text-transform: uppercase
+        - font-weight: bold
+        - position: relative
+        - overflow: hidden
+        - background-color: "#000000"
+      custom_fields:
+        notification:
+          - position: absolute
+          - left: "-25%"
+          - top: "-25%"
+          - width: 150%
+          - height: 150%
+          - background-image: |
+              [[[ return  `url("/local/solarpanel_simple.jpeg")`; ]]]
+          - background-size: contain
+          - background-position: center
+          - background-repeat: no-repeat
+          - transform: rotate(90deg)
+          - filter: |
+              [[[
+                return "brightness("+Math.min(100*(Math.round(Number(entity.state)) / 440 + 0.2), 100) + "%)"
+              ]]]
+          - z-index: 1
+      state:
+        - position: relative
+        - z-index: 2
+        - text-shadow: 0px 0px 5px black
+    custom_fields:
+      notification: " "
+    state_display: |
+      [[[
+        return Math.round(Number(entity.state))+" W" 
+      ]]]
+  - type: custom:button-card
+    entity: sensor.a12_power
+    show_name: false
+    aspect_ratio: 120/200
+    show_entity_picture: true
+    show_icon: false
+    show_state: true
+    styles:
+      card:
+        - "--keep-background": "true"
+        - border-radius: 5%
+        - padding: "-10%"
+        - color: white
+        - text-transform: uppercase
+        - font-weight: bold
+        - position: relative
+        - overflow: hidden
+        - background-color: "#000000"
+      custom_fields:
+        notification:
+          - position: absolute
+          - left: "-25%"
+          - top: "-25%"
+          - width: 150%
+          - height: 150%
+          - background-image: |
+              [[[ return  `url("/local/solarpanel_simple.jpeg")`; ]]]
+          - background-size: contain
+          - background-position: center
+          - background-repeat: no-repeat
+          - transform: rotate(90deg)
+          - filter: |
+              [[[
+                return "brightness("+Math.min(100*(Math.round(Number(entity.state)) / 440 + 0.2), 100) + "%)"
+              ]]]
+          - z-index: 1
+      state:
+        - position: relative
+        - z-index: 2
+        - text-shadow: 0px 0px 5px black
+    custom_fields:
+      notification: " "
+    state_display: |
+      [[[
+        return Math.round(Number(entity.state))+" W" 
+      ]]]
+  - type: custom:button-card
+    entity: sensor.a11_power
+    show_name: false
+    aspect_ratio: 120/200
+    show_entity_picture: true
+    show_icon: false
+    show_state: true
+    styles:
+      card:
+        - "--keep-background": "true"
+        - border-radius: 5%
+        - padding: "-10%"
+        - color: white
+        - text-transform: uppercase
+        - font-weight: bold
+        - position: relative
+        - overflow: hidden
+        - background-color: "#000000"
+      custom_fields:
+        notification:
+          - position: absolute
+          - left: "-25%"
+          - top: "-25%"
+          - width: 150%
+          - height: 150%
+          - background-image: |
+              [[[ return  `url("/local/solarpanel_simple.jpeg")`; ]]]
+          - background-size: contain
+          - background-position: center
+          - background-repeat: no-repeat
+          - transform: rotate(90deg)
+          - filter: |
+              [[[
+                return "brightness("+Math.min(100*(Math.round(Number(entity.state)) / 440 + 0.2), 100) + "%)"
+              ]]]
+          - z-index: 1
+      state:
+        - position: relative
+        - z-index: 2
+        - text-shadow: 0px 0px 5px black
+    custom_fields:
+      notification: " "
+    state_display: |
+      [[[
+        return Math.round(Number(entity.state))+" W" 
+      ]]]
+  - type: custom:button-card
+    entity: sensor.a10_power
+    show_name: false
+    aspect_ratio: 120/200
+    show_entity_picture: true
+    show_icon: false
+    show_state: true
+    styles:
+      card:
+        - "--keep-background": "true"
+        - border-radius: 5%
+        - padding: "-10%"
+        - color: white
+        - text-transform: uppercase
+        - font-weight: bold
+        - position: relative
+        - overflow: hidden
+        - background-color: "#000000"
+      custom_fields:
+        notification:
+          - position: absolute
+          - left: "-25%"
+          - top: "-25%"
+          - width: 150%
+          - height: 150%
+          - background-image: |
+              [[[ return  `url("/local/solarpanel_simple.jpeg")`; ]]]
+          - background-size: contain
+          - background-position: center
+          - background-repeat: no-repeat
+          - transform: rotate(90deg)
+          - filter: |
+              [[[
+                return "brightness("+Math.min(100*(Math.round(Number(entity.state)) / 440 + 0.2), 100) + "%)"
+              ]]]
+          - z-index: 1
+      state:
+        - position: relative
+        - z-index: 2
+        - text-shadow: 0px 0px 5px black
+    custom_fields:
+      notification: " "
+    state_display: |
+      [[[
+        return Math.round(Number(entity.state))+" W" 
+      ]]]
+  - type: custom:button-card
+    entity: sensor.a9_power
+    show_name: false
+    aspect_ratio: 120/200
+    show_entity_picture: true
+    show_icon: false
+    show_state: true
+    styles:
+      card:
+        - "--keep-background": "true"
+        - border-radius: 5%
+        - padding: "-10%"
+        - color: white
+        - text-transform: uppercase
+        - font-weight: bold
+        - position: relative
+        - overflow: hidden
+        - background-color: "#000000"
+      custom_fields:
+        notification:
+          - position: absolute
+          - left: "-25%"
+          - top: "-25%"
+          - width: 150%
+          - height: 150%
+          - background-image: |
+              [[[ return  `url("/local/solarpanel_simple.jpeg")`; ]]]
+          - background-size: contain
+          - background-position: center
+          - background-repeat: no-repeat
+          - transform: rotate(90deg)
+          - filter: |
+              [[[
+                return "brightness("+Math.min(100*(Math.round(Number(entity.state)) / 440 + 0.2), 100) + "%)"
+              ]]]
+          - z-index: 1
+      state:
+        - position: relative
+        - z-index: 2
+        - text-shadow: 0px 0px 5px black
+    custom_fields:
+      notification: " "
+    state_display: |
+      [[[
+        return Math.round(Number(entity.state))+" W" 
+      ]]]
+  - type: custom:button-card
+    entity: sensor.a8_power
+    show_name: false
+    aspect_ratio: 120/200
+    show_entity_picture: true
+    show_icon: false
+    show_state: true
+    styles:
+      card:
+        - "--keep-background": "true"
+        - border-radius: 5%
+        - padding: "-10%"
+        - color: white
+        - text-transform: uppercase
+        - font-weight: bold
+        - position: relative
+        - overflow: hidden
+        - background-color: "#000000"
+      custom_fields:
+        notification:
+          - position: absolute
+          - left: "-25%"
+          - top: "-25%"
+          - width: 150%
+          - height: 150%
+          - background-image: |
+              [[[ return  `url("/local/solarpanel_simple.jpeg")`; ]]]
+          - background-size: contain
+          - background-position: center
+          - background-repeat: no-repeat
+          - transform: rotate(90deg)
+          - filter: |
+              [[[
+                return "brightness("+Math.min(100*(Math.round(Number(entity.state)) / 440 + 0.2), 100) + "%)"
+              ]]]
+          - z-index: 1
+      state:
+        - position: relative
+        - z-index: 2
+        - text-shadow: 0px 0px 5px black
+    custom_fields:
+      notification: " "
+    state_display: |
+      [[[
+        return Math.round(Number(entity.state))+" W" 
+      ]]]
+  - type: custom:button-card
+    entity: sensor.a7_power
+    show_name: false
+    aspect_ratio: 120/200
+    show_entity_picture: true
+    show_icon: false
+    show_state: true
+    styles:
+      card:
+        - "--keep-background": "true"
+        - border-radius: 5%
+        - padding: "-10%"
+        - color: white
+        - text-transform: uppercase
+        - font-weight: bold
+        - position: relative
+        - overflow: hidden
+        - background-color: "#000000"
+      custom_fields:
+        notification:
+          - position: absolute
+          - left: "-25%"
+          - top: "-25%"
+          - width: 150%
+          - height: 150%
+          - background-image: |
+              [[[ return  `url("/local/solarpanel_simple.jpeg")`; ]]]
+          - background-size: contain
+          - background-position: center
+          - background-repeat: no-repeat
+          - transform: rotate(90deg)
+          - filter: |
+              [[[
+                return "brightness("+Math.min(100*(Math.round(Number(entity.state)) / 440 + 0.2), 100) + "%)"
+              ]]]
+          - z-index: 1
+      state:
+        - position: relative
+        - z-index: 2
+        - text-shadow: 0px 0px 5px black
+    custom_fields:
+      notification: " "
+    state_display: |
+      [[[
+        return Math.round(Number(entity.state))+" W" 
+      ]]]
+  - type: custom:button-card
+    entity: sensor.a6_power
+    show_name: false
+    aspect_ratio: 120/200
+    show_entity_picture: true
+    show_icon: false
+    show_state: true
+    styles:
+      card:
+        - "--keep-background": "true"
+        - border-radius: 5%
+        - padding: "-10%"
+        - color: white
+        - text-transform: uppercase
+        - font-weight: bold
+        - position: relative
+        - overflow: hidden
+        - background-color: "#000000"
+      custom_fields:
+        notification:
+          - position: absolute
+          - left: "-25%"
+          - top: "-25%"
+          - width: 150%
+          - height: 150%
+          - background-image: |
+              [[[ return  `url("/local/solarpanel_simple.jpeg")`; ]]]
+          - background-size: contain
+          - background-position: center
+          - background-repeat: no-repeat
+          - transform: rotate(90deg)
+          - filter: |
+              [[[
+                return "brightness("+Math.min(100*(Math.round(Number(entity.state)) / 440 + 0.2), 100) + "%)"
+              ]]]
+          - z-index: 1
+      state:
+        - position: relative
+        - z-index: 2
+        - text-shadow: 0px 0px 5px black
+    custom_fields:
+      notification: " "
+    state_display: |
+      [[[
+        return Math.round(Number(entity.state))+" W" 
+      ]]]
+  - type: custom:button-card
+    entity: sensor.a5_power
+    show_name: false
+    aspect_ratio: 120/200
+    show_entity_picture: true
+    show_icon: false
+    show_state: true
+    styles:
+      card:
+        - "--keep-background": "true"
+        - border-radius: 5%
+        - padding: "-10%"
+        - color: white
+        - text-transform: uppercase
+        - font-weight: bold
+        - position: relative
+        - overflow: hidden
+        - background-color: "#000000"
+      custom_fields:
+        notification:
+          - position: absolute
+          - left: "-25%"
+          - top: "-25%"
+          - width: 150%
+          - height: 150%
+          - background-image: |
+              [[[ return  `url("/local/solarpanel_simple.jpeg")`; ]]]
+          - background-size: contain
+          - background-position: center
+          - background-repeat: no-repeat
+          - transform: rotate(90deg)
+          - filter: |
+              [[[
+                return "brightness("+Math.min(100*(Math.round(Number(entity.state)) / 440 + 0.2), 100) + "%)"
+              ]]]
+          - z-index: 1
+      state:
+        - position: relative
+        - z-index: 2
+        - text-shadow: 0px 0px 5px black
+    custom_fields:
+      notification: " "
+    state_display: |
+      [[[
+        return Math.round(Number(entity.state))+" W" 
+      ]]]
+  - type: custom:button-card
+    entity: sensor.a4_power
+    show_name: false
+    aspect_ratio: 120/200
+    show_entity_picture: true
+    show_icon: false
+    show_state: true
+    styles:
+      card:
+        - "--keep-background": "true"
+        - border-radius: 5%
+        - padding: "-10%"
+        - color: white
+        - text-transform: uppercase
+        - font-weight: bold
+        - position: relative
+        - overflow: hidden
+        - background-color: "#000000"
+      custom_fields:
+        notification:
+          - position: absolute
+          - left: "-25%"
+          - top: "-25%"
+          - width: 150%
+          - height: 150%
+          - background-image: |
+              [[[ return  `url("/local/solarpanel_simple.jpeg")`; ]]]
+          - background-size: contain
+          - background-position: center
+          - background-repeat: no-repeat
+          - transform: rotate(90deg)
+          - filter: |
+              [[[
+                return "brightness("+Math.min(100*(Math.round(Number(entity.state)) / 440 + 0.2), 100) + "%)"
+              ]]]
+          - z-index: 1
+      state:
+        - position: relative
+        - z-index: 2
+        - text-shadow: 0px 0px 5px black
+    custom_fields:
+      notification: " "
+    state_display: |
+      [[[
+        return Math.round(Number(entity.state))+" W" 
+      ]]]
+  - type: custom:button-card
+    entity: sensor.a3_power
+    show_name: false
+    aspect_ratio: 120/200
+    show_entity_picture: true
+    show_icon: false
+    show_state: true
+    styles:
+      card:
+        - "--keep-background": "true"
+        - border-radius: 5%
+        - padding: "-10%"
+        - color: white
+        - text-transform: uppercase
+        - font-weight: bold
+        - position: relative
+        - overflow: hidden
+        - background-color: "#000000"
+      custom_fields:
+        notification:
+          - position: absolute
+          - left: "-25%"
+          - top: "-25%"
+          - width: 150%
+          - height: 150%
+          - background-image: |
+              [[[ return  `url("/local/solarpanel_simple.jpeg")`; ]]]
+          - background-size: contain
+          - background-position: center
+          - background-repeat: no-repeat
+          - transform: rotate(90deg)
+          - filter: |
+              [[[
+                return "brightness("+Math.min(100*(Math.round(Number(entity.state)) / 440 + 0.2), 100) + "%)"
+              ]]]
+          - z-index: 1
+      state:
+        - position: relative
+        - z-index: 2
+        - text-shadow: 0px 0px 5px black
+    custom_fields:
+      notification: " "
+    state_display: |
+      [[[
+        return Math.round(Number(entity.state))+" W" 
+      ]]]
+  - type: custom:button-card
+    entity: sensor.a2_power
+    show_name: false
+    aspect_ratio: 120/200
+    show_entity_picture: true
+    show_icon: false
+    show_state: true
+    styles:
+      card:
+        - "--keep-background": "true"
+        - border-radius: 5%
+        - padding: "-10%"
+        - color: white
+        - text-transform: uppercase
+        - font-weight: bold
+        - position: relative
+        - overflow: hidden
+        - background-color: "#000000"
+      custom_fields:
+        notification:
+          - position: absolute
+          - left: "-25%"
+          - top: "-25%"
+          - width: 150%
+          - height: 150%
+          - background-image: |
+              [[[ return  `url("/local/solarpanel_simple.jpeg")`; ]]]
+          - background-size: contain
+          - background-position: center
+          - background-repeat: no-repeat
+          - transform: rotate(90deg)
+          - filter: |
+              [[[
+                return "brightness("+Math.min(100*(Math.round(Number(entity.state)) / 440 + 0.2), 100) + "%)"
+              ]]]
+          - z-index: 1
+      state:
+        - position: relative
+        - z-index: 2
+        - text-shadow: 0px 0px 5px black
+    custom_fields:
+      notification: " "
+    state_display: |
+      [[[
+        return Math.round(Number(entity.state))+" W" 
+      ]]]
+  - type: custom:button-card
+    entity: sensor.a1_power
+    show_name: false
+    aspect_ratio: 120/200
+    show_entity_picture: true
+    show_icon: false
+    show_state: true
+    styles:
+      card:
+        - "--keep-background": "true"
+        - border-radius: 5%
+        - padding: "-10%"
+        - color: white
+        - text-transform: uppercase
+        - font-weight: bold
+        - position: relative
+        - overflow: hidden
+        - background-color: "#000000"
+      custom_fields:
+        notification:
+          - position: absolute
+          - left: "-25%"
+          - top: "-25%"
+          - width: 150%
+          - height: 150%
+          - background-image: |
+              [[[ return  `url("/local/solarpanel_simple.jpeg")`; ]]]
+          - background-size: contain
+          - background-position: center
+          - background-repeat: no-repeat
+          - transform: rotate(90deg)
+          - filter: |
+              [[[
+                return "brightness("+Math.min(100*(Math.round(Number(entity.state)) / 440 + 0.2), 100) + "%)"
+              ]]]
+          - z-index: 1
+      state:
+        - position: relative
+        - z-index: 2
+        - text-shadow: 0px 0px 5px black
+    custom_fields:
+      notification: " "
+    state_display: |
+      [[[
+        return Math.round(Number(entity.state))+" W" 
+      ]]]
