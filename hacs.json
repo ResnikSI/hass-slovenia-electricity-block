@@ -2,5 +2,8 @@
     "name": "Slovenia Electricity Block",
     "render_readme": true,
     "domains": ["sensor"],
-    "iot_class": "calculated"
+    "iot_class": "calculated",
+    "homeassistant": "2024.1.0",
+    "zip_release": true,
+    "filename": "slo_electricity_block.zip"
 }
