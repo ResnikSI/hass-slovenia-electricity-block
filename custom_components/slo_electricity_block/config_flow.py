@@ -29,10 +29,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors = {}
 
+        # Check if already configured
+        if self._async_current_entries():
+            return self.async_abort(reason="single_instance_allowed")
+
         if user_input is not None:
             await self.async_set_unique_id(DOMAIN)
-            if self._async_current_entries():
-                return self.async_abort(reason="single_instance_allowed")
             return self.async_create_entry(
                 title="Slovenia Electricity Block",
                 data=user_input or {},
