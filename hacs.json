@@ -7,9 +7,10 @@
     "zip_release": true,
     "filename": "slo_electricity_block.zip",
     "hide_default_branch": true,
-    "releases_per_page": 15,
-    "content_in_root": false,
-    "country": ["SI"],
     "render_readme": true,
-    "hacs": "1.6.0"
+    "country": ["SI"],
+    "persistent_directory": "custom_components/slo_electricity_block",
+    "hacs": "1.6.0",
+    "full_name": "ResnikSI/hass-slovenia-electricity-block",
+    "archive_download_url": "https://github.com/ResnikSI/hass-slovenia-electricity-block/releases/download/{version}/slo_electricity_block.zip"
 }
