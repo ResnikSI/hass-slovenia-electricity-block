@@ -8,5 +8,5 @@
     "hacs": "1.6.0",
     "filename": "slo_electricity_block.zip",
     "hide_default_branch": true,
-    "icon": "icon.svg"
+    "icon": "icon.png"
 }
